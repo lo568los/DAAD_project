@@ -11,6 +11,9 @@
 #@ queue 
 
 export OMP_NUM_THREADS=8
+Ahub=-4.7
+Dopinghub=1
+t_primehub=1
+Thub=1
 
-
-python3 test.py 20
+python3 test.py $Ahub
