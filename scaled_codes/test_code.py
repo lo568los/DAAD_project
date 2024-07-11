@@ -12,12 +12,16 @@ from qiskit import QuantumCircuit
 import qiskit_aer 
 from qiskit.quantum_info import state_fidelity
 from qiskit_aer import AerSimulator
-from qiskit import transpile
-from qiskit.quantum_info.states.random import random_statevector
+#from qiskit import transpile
+#from qiskit.quantum_info.states.random import random_statevector
 #from qiskit.circuit.library import Initialize
-from qiskit.visualization import plot_bloch_multivector
+#from qiskit.visualization import plot_bloch_multivector
 import numpy as np
-#import matplotlib.pyplot as plt
+from qiskit.quantum_info import partial_trace # To check later whether our derived density matrix is correct
+from qiskit.quantum_info import DensityMatrix
+from qiskit.quantum_info import purity
+from scipy import linalg as la
+
 
 from qiskit_aer.primitives import Sampler
 from qiskit_aer.primitives import Estimator
@@ -395,6 +399,50 @@ def plot_correlator(qc_list,pos):
     final_vals = [a-b for a,b in zip(exp_vals,exp_vals_red)]
     return final_vals
 
+def trace_norm(density_matrix):
+    density_matrix = np.array(density_matrix)
+    eigenvalues, eigenvectors = np.linalg.eig(density_matrix)
+    sum = 0
+    #print(eigenvalues)
+    for i in eigenvalues:
+        if i.real < 0:
+            sum += i.real
+    #print(sum)
+    return abs(sum)
+
+def calculate_entropy(rho):
+    rho = np.array(rho)
+    R = rho*(la.logm(rho))
+    S = -np.matrix.trace(R)
+    return S
+
+
+def von_neumann_entropy(reduced_dm_list):
+    entropy_list = []
+    for dm in reduced_dm_list:
+        entropy = calculate_entropy(dm)
+        entropy_list.append(entropy)
+    return entropy_list
+
+def negativity(density_matrix_list):
+    neg_list = []
+    for density_matrix in density_matrix_list:
+        dm_pt = density_matrix.partial_transpose([N])
+        neg = trace_norm(dm_pt)
+        #print(neg)
+        neg_list.append(neg.real)
+    return neg_list
+
+def concurrence(reduced_dm_list):
+    concurrence_list = []
+    for dm in reduced_dm_list:
+        c = purity(dm).real
+        if c>1:
+            c = 1
+            print("Purity is greater than 1,by a value of:",c-1)
+        concurrence_list.append(np.sqrt(2*(1-c)))
+    return concurrence_list
+
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and correlator functions w.r.t time and space    ###########################
 
@@ -428,9 +476,38 @@ else:
 
     h_values1 = plot_hexp(super_qc_list)
 
-    print('Calculating correlator functions as function of time and space....')
+    print("Calculating entanglement measures (Concurrence and Von-Neumann Entropy)")
+
+    Z_imp_observables = [SparsePauliOp('I'*(N) + 'Z' + 'I'*(N))]*max_trotter_steps
+    X_imp_observables = [SparsePauliOp('I'*(N) + 'X' + 'I'*(N))]*max_trotter_steps
+    Y_imp_observables = [SparsePauliOp('I'*(N) + 'Y' + 'I'*(N))]*max_trotter_steps
+
+    Z_avg = estimator.run(super_qc_list[0][0],Z_imp_observables,shots = None)
+    X_avg = estimator.run(super_qc_list[0][0],X_imp_observables,shots = None)
+    Y_avg = estimator.run(super_qc_list[0][0],Y_imp_observables,shots = None)
+
+    Z_values = list(Z_avg.result().values)
+    X_values = list(X_avg.result().values)
+    Y_values = list(Y_avg.result().values)
+
+    reduced_dm_tomo = []
+    for i in range(max_trotter_steps):
+        reduced_dm = DensityMatrix((1/2)*(np.eye(2) + X_values[i]*np.array([[0,1],[1,0]]) + Y_values[i]*np.array([[0,-1j],[1j,0]]) + Z_values[i]*np.array([[1,0],[0,-1]])))
+        reduced_dm_tomo.append(reduced_dm)
+
+    von_neumann_entropy_list = von_neumann_entropy(reduced_dm_tomo)
+    von_neumann_entropy_list = [x.real for x in von_neumann_entropy_list]
+    #negativity_list = negativity(density_matrix_list)    #Takes a tremendous amount of time.... best calculated in a separate script/cell
+    concurrence_list = concurrence(reduced_dm_tomo)
+    concurrence_list = [y.real for y in concurrence_list]
+
+    
+
+
+
+    """print('Calculating correlator functions as function of time and space....')
     for pos in pos_list:
-        super_corr_list.append(plot_correlator(super_qc_list[0][0],pos))
+        super_corr_list.append(plot_correlator(super_qc_list[0][0],pos))   #calculate correlator functions in a separate python file...."""
 
     print('All calculations done!')
 
@@ -442,18 +519,24 @@ else:
     string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}"
     header_sz = string + "\n TIME || S_z impurity expectation value"
     header_h = string + "\n TIME || H(t) expectation value"
+    header_ent = string + "\n TIME || CONCURRENCE || VON NEUMANN"
 
     data_sz = np.column_stack((time_list,expectation_list_1))
-    np.savetxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}_sz.txt",data_sz,header = header_sz)
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
     data_h = np.column_stack((time_list,h_values1))
-    np.savetxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}_h.txt",data_h,header = header_h)
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
+    data_ent = np.column_stack((time_list,concurrence_list,von_neumann_entropy_list))
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)
 
-    header_corr = string + "\n TIME || Correlator function_vals"
+
+
+
+    """header_corr = string + "\n TIME || Correlator function_vals"
     data_corr = np.column_stack((time_list,super_corr_list[0])) 
     for i in range(1,len(pos_list)):
         data_corr = np.column_stack((data_corr,super_corr_list[i]))
 
-    np.savetxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}_corr.txt",data_corr,header = header_corr)
+    np.savetxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}_corr.txt",data_corr,header = header_corr)"""
     
 
 
