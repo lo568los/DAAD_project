@@ -14,12 +14,12 @@ from qiskit.quantum_info import state_fidelity
 from qiskit_aer import AerSimulator
 from qiskit import transpile
 from qiskit.quantum_info.states.random import random_statevector
-from qiskit.circuit.library import Initialize
+#from qiskit.circuit.library import Initialize
 from qiskit.visualization import plot_bloch_multivector
 import numpy as np
 import matplotlib.pyplot as plt
 
-from qiskit_aer.primitives import SamplerV2 as Sampler
+from qiskit_aer.primitives import Sampler
 from qiskit_aer.primitives import Estimator
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.quantum_info import Operator
@@ -330,18 +330,29 @@ def plot_mag_impurity(super_qc_list_20):
         theta = super_qc_list_20[i][1]
         theta_k = super_qc_list_20[i][2]
         qc_list = super_qc_list_20[i][0]
-        imp_observables = [SparsePauliOp('I'*N + 'Z' + 'I'*N)]*20
+        imp_observables = [SparsePauliOp('I'*N + 'Z' + 'I'*N)]*max_trotter_steps
         job_1 = estimator.run(qc_list,imp_observables,shots = None)
         expectation_list_1 = list(job_1.result().values)
         return expectation_list_1
     
+H_t = 0
+H_k = 0
+for i in range(2*N):
+    if i==N-1 or i==N:
+        continue
+    else:
+        H_t += -theta*(SparsePauliOp('I'*(i) + 'XX' + 'I'*(2*N-i-1)) + SparsePauliOp('I'*(i) + 'YY' + 'I'*(2*N-i-1)))
+H_k = (-theta_k/2)*(SparsePauliOp('I'*(N-1) + 'XXX' + 'I'*(N-1))+SparsePauliOp('I'*(N-1) + 'YXY' + 'I'*(N-1)) + SparsePauliOp('I'*(N-1) + 'XYY' + 'I'*(N-1))- SparsePauliOp('I'*(N-1) + 'YYX' + 'I'*(N-1))+ SparsePauliOp('I'*(N) + 'ZZ' + 'I'*(N-1)) - SparsePauliOp('I'*(N-1) + 'ZZ' + 'I'*(N)))
+    
 def plot_hexp(super_qc_list_50):
+
+
     for i in range(len(super_qc_list_50)):
         theta = super_qc_list_50[i][1]
         theta_k = super_qc_list_50[i][2]
         qc_list = super_qc_list_50[i][0]
 
-        h_analytical = [H_t + H_k]*50
+        h_analytical = [H_t + H_k]*max_trotter_steps
         #print("Operator obtained from circuit")
         job_analytical = estimator.run(qc_list,h_analytical,shots = None)
         h_values1 = list(job_analytical.result().values)
@@ -403,7 +414,7 @@ else:
     qc_list = []
     qc_list_2 = []
     for t in range(max_trotter_steps):
-        qc = circuit_3(N,[0,1,2*N], t, theta,theta_k,theta_z,num_cl_bits = len(measured_bits), trotter_barriers = True, save = True)
+        qc = circuit_3(N,[0,1,2*N], t, [theta,0,0],theta_k,theta_z,num_cl_bits = len(measured_bits), trotter_barriers = True, save = True)
         qc.measure(measured_bits,list(range(len(measured_bits))))
         qc_list.append(qc)
     super_qc_list.append((qc_list,theta,theta_k))
@@ -419,7 +430,7 @@ else:
 
     print('Calculating correlator functions as function of time and space....')
     for pos in pos_list:
-        super_corr_list.append(plot_correlator(super_qc_list[0],pos))
+        super_corr_list.append(plot_correlator(super_qc_list[0][0],pos))
 
     print('All calculations done!')
 
@@ -428,7 +439,7 @@ else:
     time_list = list(range(max_trotter_steps))
     
 
-    string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}, time_corr = {time_corr}"
+    string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}"
     header_sz = string + "\n TIME || S_z impurity expectation value"
     header_h = string + "\n TIME || H(t) expectation value"
 
@@ -437,12 +448,12 @@ else:
     data_h = np.column_stack((time_list,h_values1))
     np.savetxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}_h.txt",data_h,header = header_h)
 
-    """header_corr = string + "\n TIME || Correlator function_vals"
+    header_corr = string + "\n TIME || Correlator function_vals"
     data_corr = np.column_stack((time_list,super_corr_list[0])) 
     for i in range(1,len(pos_list)):
         data_corr = np.column_stack((data_corr,super_corr_list[i]))
 
-    np.savetxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}_corr.txt",data_corr,header = header_corr)"""
+    np.savetxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}_corr.txt",data_corr,header = header_corr)
     
 
 
