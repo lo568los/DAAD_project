@@ -1,4 +1,4 @@
-## This is the test version of the python file that is passed on to the cluster
+## This is the plotting file which will generate all the plots
 
 ## Author: Soumyadeep Sarma
 
@@ -8,4 +8,73 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
+N_list = [6]
+theta_list = [1.07]  #pass the true values here
+thetak_list = [0.79]
+max_trotter_steps = 5
+
+def plot_corr_space(pos,corr_super):   # For corr vs time
+    vals = corr_super[pos-1]
+    #print(vals)
+    plt.plot(range(max_trotter_steps),vals)
+    plt.xlabel("Time(trotter steps)")
+    plt.ylabel(r"$\langle S_z(x,t)S_z(0,t) \rangle$")
+    plt.title("Correlator expectation as a function of time")
+    plt.savefig(f"scaled_codes/Correlator time, N = {N}")
+    plt.close()
+
+def plot_corr_time(t, corr_super): # For corr vs pos
+    corr_super = np.array(corr_super)
+    vals = corr_super[:,t]
+    #print(vals)
+    plt.plot(range(1,N+1),vals)
+    plt.xlabel("Position of spin")
+    plt.ylabel(r"$\langle S_z(x,{t})S_z(0,{t}) \rangle$" +f"at t = {t}")
+    plt.title("Correlator expectation as a function of space")
+    plt.savefig(f"scaled_codes/Correlator space, N = {N}")
+    plt.close()
+
+
+for N in N_list:
+    for theta in theta_list:
+        for theta_k in thetak_list:
+
+
+            data1 = np.loadtxt(f"scaled_codes/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
+            data2 = np.loadtxt(f"scaled_codes/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt")
+            data3 = np.loadtxt(f"scaled_codes/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_corr.txt")
+            sz_vals = data1[:,1]
+            h_vals = data2[:,1]
+
+            corr_super = []
+            for i in range(1,N+1):
+                corr_super.append(data3[:,i])
+
+
+
+
+###################    Step 3: Plot the data   ###########################
+
+            plt.plot(range(max_trotter_steps),sz_vals)
+            plt.xlabel("Time(trotter steps)")
+            plt.ylabel(r"$\langle S^z_{imp}(t)\rangle$")
+            plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
+            plt.savefig(f"scaled_codes/Sz plot, N = {N}")
+            plt.close()
+
+            plt.plot(range(max_trotter_steps),sz_vals)
+            plt.xlabel("Time(trotter steps)")
+            plt.ylabel(r"$\langle H \rangle (t)$")
+            plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
+            plt.savefig(f"scaled_codes/H_exp plot, N = {N}")
+            plt.close()
+
+            plot_corr_space(1,corr_super)
+            plot_corr_time(2,corr_super)
+
+
+
+
+
+
 
