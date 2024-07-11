@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 N_list = [6]
 theta_list = [1.07]  #pass the true values here
 thetak_list = [0.79]
-max_trotter_steps = 5
+max_trotter_steps = 20
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -62,7 +62,7 @@ for N in N_list:
             plt.savefig(f"scaled_codes/Sz plot, N = {N}")
             plt.close()
 
-            plt.plot(range(max_trotter_steps),sz_vals)
+            plt.plot(range(max_trotter_steps),h_vals)
             plt.xlabel("Time(trotter steps)")
             plt.ylabel(r"$\langle H \rangle (t)$")
             plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")

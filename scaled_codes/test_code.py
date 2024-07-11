@@ -17,7 +17,7 @@ from qiskit.quantum_info.states.random import random_statevector
 #from qiskit.circuit.library import Initialize
 from qiskit.visualization import plot_bloch_multivector
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from qiskit_aer.primitives import Sampler
 from qiskit_aer.primitives import Estimator
