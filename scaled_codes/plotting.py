@@ -43,10 +43,10 @@ for N in N_list:
             else:
 
 
-                data1 = np.loadtxt(f"scaled_codes/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
-                data2 = np.loadtxt(f"scaled_codes/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt")
+                data1 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
+                data2 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt")
                 #data3 = np.loadtxt(f"scaled_codes/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_corr.txt")
-                data4 = np.loadtxt(f"scaled_codes/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
+                data4 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
                 sz_vals = data1[:,1]
                 h_vals = data2[:,1]
                 conc_vals = data4[:,1]
@@ -67,14 +67,14 @@ for N in N_list:
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"$\langle S^z_{imp}(t)\rangle$")
                 plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
-                plt.savefig(f"scaled_codes/Sz plot, N = {N}", dpi =500)
+                plt.savefig(f"scaled_codes/plots/Sz plot, N = {N}", dpi =500)
                 plt.close()
 
                 plt.plot(range(max_trotter_steps),h_vals)
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"$\langle H \rangle (t)$")
                 plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
-                plt.savefig(f"scaled_codes/H_exp plot, N = {N}", dpi =500)
+                plt.savefig(f"scaled_codes/plots/H_exp plot, N = {N}", dpi =500)
                 plt.close()
 
                 plt.plot(range(max_trotter_steps),conc_vals, label = "Concurrence")
@@ -83,7 +83,7 @@ for N in N_list:
                 plt.ylabel(r"Entanglement between subsystems")
                 plt.title(f"Entanglement measures between impurity and leads for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
                 plt.legend()
-                plt.savefig(f"scaled_codes/Entanglement plot, N = {N}", dpi = 500)
+                plt.savefig(f"scaled_codes/plots/Entanglement plot, N = {N}", dpi = 500)
                 plt.close()
 
 
