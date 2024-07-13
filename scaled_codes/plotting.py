@@ -16,12 +16,8 @@ max_trotter_steps = 5
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
     #print(vals)
-    plt.plot(range(max_trotter_steps),vals)
-    plt.xlabel("Time(trotter steps)")
-    plt.ylabel(r"$\langle S_z(x,t)S_z(0,t) \rangle$")
-    plt.title("Correlator expectation as a function of time")
-    plt.savefig(f"scaled_codes/Correlator time, N = {N}")
-    plt.close()
+    plt.plot(range(20),vals, label = f"Position (x) = {pos}")
+    
 
 def plot_corr_time(t, corr_super): # For corr vs pos
     corr_super = np.array(corr_super)
@@ -31,7 +27,7 @@ def plot_corr_time(t, corr_super): # For corr vs pos
     plt.xlabel("Position of spin")
     plt.ylabel(r"$\langle S_z(x,{t})S_z(0,{t}) \rangle$" +f"at t = {t}")
     plt.title("Correlator expectation as a function of space")
-    plt.savefig(f"scaled_codes/Correlator space, N = {N}")
+    plt.savefig(f"scaled_codes/plots/Correlator space, N = {N}")
     plt.close()
 
 
@@ -45,7 +41,7 @@ for N in N_list:
 
                 data1 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
                 data2 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt")
-                #data3 = np.loadtxt(f"scaled_codes/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_corr.txt")
+                data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = 0.79, theta_k = 0.53_corr.txt")
                 data4 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
                 sz_vals = data1[:,1]
                 h_vals = data2[:,1]
@@ -54,9 +50,9 @@ for N in N_list:
                 #conc_vals = [x.real for x in conc_vals]
                 #vne_vals = [y.real for y in conc_vals]
 
-                """corr_super = []
+                corr_super = []
                 for i in range(1,N+1):
-                    corr_super.append(data3[:,i])"""
+                    corr_super.append(data3[:,i])
 
 
 
@@ -87,9 +83,16 @@ for N in N_list:
                 plt.close()
 
 
-
-            #plot_corr_space(1,corr_super)
-            #plot_corr_time(2,corr_super)
+            pos_list = [1,2,3]
+            for pos in pos_list:
+                plot_corr_space(pos,corr_super)
+            plt.xlabel("Time(trotter steps)")
+            plt.ylabel(r"$\langle S_z(x,t)S_z(0,t) \rangle$")
+            plt.title("Correlator expectation as a function of time")
+            plt.legend()
+            plt.savefig(f"scaled_codes/plots/Correlator time, N = {N}")
+            plt.close()
+            plot_corr_time(2,corr_super)
 
 
 
