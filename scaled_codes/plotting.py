@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 N_list = [6]
 theta_list = [1.07]  #pass the true values here
 thetak_list = [0.79]
-max_trotter_steps = 5
+max_trotter_steps = 100
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
