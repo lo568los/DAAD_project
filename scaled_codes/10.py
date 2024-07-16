@@ -40,10 +40,10 @@ import time
 
 ###################    Step 2: Define the helper functions    ###########################
 
-N = int(sys.argv[1])  #Number of fermionic sites
-theta = float(sys.argv[2]) #hoping parameter for free fermions
-theta_k = float(sys.argv[3]) #Kondo interaction
-max_trotter_steps = int(sys.argv[4]) #number of time steps
+N = 10  #Number of fermionic sites
+theta = 1.07 #hoping parameter for free fermions
+theta_k = 0.79 #Kondo interaction
+max_trotter_steps = 50 #number of time steps
 #time_corr = int(sys.argv[5]) #time for correlator functions
 
 num_qubits = 2*N + 1  #In split side configuration

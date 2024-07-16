@@ -334,117 +334,11 @@ def circuit_3(N, pos_list, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num
     #qc.save_statevector()  remove save for changing to operator
     return qc
 
-def plot_mag_impurity(super_qc_list_20,sz_list1):
-    for i in range(len(super_qc_list_20)):
-        theta = super_qc_list_20[i][1]
-        theta_k = super_qc_list_20[i][2]
-        qc_list = super_qc_list_20[i][0]
-        imp_observables = [SparsePauliOp('I'*N + 'Z' + 'I'*N)]*max_trotter_steps
-        job_1 = estimator.run(qc_list,imp_observables,shots = None)
-        sz_list1.append(list(job_1.result().values))
-    print("Impurity magnetization calculated successfully!")
-    
-H_t = 0
-H_k = 0
-for i in range(2*N):
-    if i==N-1 or i==N:
-        continue
-    else:
-        H_t += -theta*(SparsePauliOp('I'*(i) + 'XX' + 'I'*(2*N-i-1)) + SparsePauliOp('I'*(i) + 'YY' + 'I'*(2*N-i-1)))
-H_k = (-theta_k/2)*(SparsePauliOp('I'*(N-1) + 'XXX' + 'I'*(N-1))+SparsePauliOp('I'*(N-1) + 'YXY' + 'I'*(N-1)) + SparsePauliOp('I'*(N-1) + 'XYY' + 'I'*(N-1))- SparsePauliOp('I'*(N-1) + 'YYX' + 'I'*(N-1))+ SparsePauliOp('I'*(N) + 'ZZ' + 'I'*(N-1)) - SparsePauliOp('I'*(N-1) + 'ZZ' + 'I'*(N)))
-    
-def plot_hexp(super_qc_list_50,h_values1):
-
-
-    for i in range(len(super_qc_list_50)):
-        theta = super_qc_list_50[i][1]
-        theta_k = super_qc_list_50[i][2]
-        qc_list = super_qc_list_50[i][0]
-
-        h_analytical = [H_t + H_k]*max_trotter_steps
-        #print("Operator obtained from circuit")
-        job_analytical = estimator.run(qc_list,h_analytical,shots = None)
-        h_values1.append(list(job_analytical.result().values))
-
-    print("Hamiltonian expectation calculated successfully!")
-    
-imp_op = SparsePauliOp('I'*N + 'Z' + 'I'*N)
-
-def ferm_mag(pos):
-    op1 = SparsePauliOp('I'*(N+pos) + 'Z' + 'I'*(N-pos))
-    op2 = SparsePauliOp('I'*(N-pos) + 'Z' + 'I'*(N+pos))
-
-    ferm_mag_op = 0.5*(op2 - op1)
-    #print(ferm_mag_op)
-    return ferm_mag_op
-
-def correlator_expectation2(pos,qc_list):
-    op1 = ferm_mag(pos)
-    corr_op = op1 @ imp_op
-    obs_list = [corr_op]*max_trotter_steps
-    job = estimator.run(qc_list,obs_list,shots = None)
-    exp_vals = list(job.result().values)
-    return exp_vals
-
-def reduced_corr(pos,qc_list):
-    op1 = ferm_mag(pos)
-    op2 = SparsePauliOp('I'*N + 'Z' + 'I'*N)
-    obs_list1 = [op1]*max_trotter_steps
-    obs_list2 = [op2]*max_trotter_steps
-    job1 = estimator.run(qc_list,obs_list1,shots = None)
-    job2 = estimator.run(qc_list,obs_list2,shots = None)
-    exp_vals1 = list(job1.result().values)
-    exp_vals2 = list(job2.result().values)
-    exp_vals_red = [a*b for a,b in zip(exp_vals1,exp_vals2)]
-    return exp_vals_red
-
-def plot_correlator(qc_list,pos):
-    exp_vals = correlator_expectation2(pos,qc_list)
-    exp_vals_red = reduced_corr(pos,qc_list)
-    final_vals = [a-b for a,b in zip(exp_vals,exp_vals_red)]
-    return final_vals
-
-def trace_norm(density_matrix):
-    density_matrix = np.array(density_matrix)
-    eigenvalues, eigenvectors = np.linalg.eig(density_matrix)
-    sum = 0
-    #print(eigenvalues)
-    for i in eigenvalues:
-        if i.real < 0:
-            sum += i.real
-    #print(sum)
-    return abs(sum)
-
-def calculate_entropy(rho):
-    rho = np.array(rho)
-    R = rho*(la.logm(rho))
-    S = -np.matrix.trace(R)
-    return S
-
-
-def von_neumann_entropy(reduced_dm_list, vn_list1):
-    for dm in reduced_dm_list:
-        entropy = calculate_entropy(dm)
-        vn_list1.append(entropy.real)
-    print("Von Neumann entropy calculated successfully!")
-
-def negativity(density_matrix_list):
-    neg_list = []
-    for density_matrix in density_matrix_list:
-        dm_pt = density_matrix.partial_transpose([N])
-        neg = trace_norm(dm_pt)
-        #print(neg)
-        neg_list.append(neg.real)
-    return neg_list
-
-def concurrence(reduced_dm_list, conc_list1):
-    for dm in reduced_dm_list:
-        c = purity(dm).real
-        if c>1:
-            c = 1
-            print("Purity is greater than 1,by a value of:",c-1)
-        conc_list1.append((np.sqrt(2*(1-c))).real)
-    print("Concurrence calculated successfully!")
+def plot_mag_impurity(qc,sz_list1):
+    imp_observables = SparsePauliOp('I'*N + 'Z' + 'I'*N)
+    job_1 = estimator.run(qc,imp_observables,shots = None)
+    sz_list1.append(job_1.result().values[0])
+    #print("Impurity magnetization calculated successfully!")
 
 
 
@@ -471,12 +365,12 @@ else:
     t0 = time.time()
     theta_z = -theta_k
     qc_list = []
-    qc_list_2 = []
+    #qc_list_2 = []
     for t in range(max_trotter_steps):
         qc = circuit_3(N,[0,1,2*N], t, [theta,0,0],theta_k,theta_z,num_cl_bits = len(measured_bits), trotter_barriers = True, save = True)
         qc.measure(measured_bits,list(range(len(measured_bits))))
         qc_list.append(qc)
-    super_qc_list.append((qc_list,theta,theta_k))
+    #super_qc_list.append((qc_list,theta,theta_k))
 
     t1 = time.time()
 
@@ -484,46 +378,24 @@ else:
 
     print("Super list genereted successfully! Time taken:",round(total1,2))
 
-    """t2 = time.time()
-
-    Z_imp_observables = [SparsePauliOp('I'*(N) + 'Z' + 'I'*(N))]*max_trotter_steps
-    X_imp_observables = [SparsePauliOp('I'*(N) + 'X' + 'I'*(N))]*max_trotter_steps
-    Y_imp_observables = [SparsePauliOp('I'*(N) + 'Y' + 'I'*(N))]*max_trotter_steps
-
-    Z_avg = estimator.run(super_qc_list[0][0],Z_imp_observables,shots = 1000)
-    X_avg = estimator.run(super_qc_list[0][0],X_imp_observables,shots = 1000)
-    Y_avg = estimator.run(super_qc_list[0][0],Y_imp_observables,shots = 1000)
-
-    Z_values = [x.real for x in list(Z_avg.result().values)]
-    X_values = [x.real for x in list(X_avg.result().values)]
-    Y_values = [x.real for x in list(Y_avg.result().values)]
-
-    reduced_dm_tomo = []
-    for i in range(max_trotter_steps):
-        reduced_dm = DensityMatrix((1/2)*(np.eye(2) + X_values[i]*np.array([[0,1],[1,0]]) + Y_values[i]*np.array([[0,-1j],[1j,0]]) + Z_values[i]*np.array([[1,0],[0,-1]])))
-        reduced_dm_tomo.append(reduced_dm)
-
-    t3 = time.time()
-    total2 = t3-t2
-
-    print("Reduced density matrices calculated successfully! Time taken:",round(total2,2))"""
+    
     print("Starting to calculate expectation values in a parallel fashion....")
     t4 = time.time()
-    threads = [None]*2
+    num_threads = 10
+    threads = [None]*num_threads
 
-    for i in range(len(threads)):
-        if i == 0:
-            threads[i] = Thread(target = plot_mag_impurity, args = (super_qc_list,sz_list1))
-        if i == 1:
-            threads[i] = Thread(target = plot_hexp, args = (super_qc_list,h_list1))
-        """if i == 2:
-            threads[i] = Thread(target = von_neumann_entropy, args = (reduced_dm_tomo,vn_list1))
-        if i == 3:
-            threads[i] = Thread(target = concurrence, args = (reduced_dm_tomo,conc_list1))"""
-        threads[i].start()
+    batch_size = max_trotter_steps//num_threads
+    for n in range(batch_size):
+        
+        for i in range(len(threads)):
+            threads[i] = Thread(target = concurrence, args = (reduced_dm_tomo,conc_list1))
+            
+            threads[i].start()
 
-    for i in range(len(threads)):
-        threads[i].join()
+        for i in range(len(threads)):
+             threads[i].join()
+
+        print(f"Batch {n+1} completed")
     
     t5 = time.time()
     total3 = t5-t4
@@ -538,16 +410,16 @@ else:
     
 
     string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}"
-    header_sz = string + "\n TIME || S_z impurity expectation value"
-    header_h = string + "\n TIME || H(t) expectation value"
+    #header_sz = string + "\n TIME || S_z impurity expectation value"
+    #header_h = string + "\n TIME || H(t) expectation value"
     header_ent = string + "\n TIME || CONCURRENCE || VON NEUMANN"
 
-    data_sz = np.column_stack((time_list,sz_list1[0]))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
-    data_h = np.column_stack((time_list,h_list1[0]))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
-    """data_ent = np.column_stack((time_list,conc_list1,vn_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)"""
+    #data_sz = np.column_stack((time_list,sz_list1))
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
+    #data_h = np.column_stack((time_list,h_list1[0]))
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
+    data_ent = np.column_stack((time_list,conc_list1))
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)
 
     #t7 = time.time()
     #total4 = t7-t6
