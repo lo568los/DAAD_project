@@ -40,10 +40,10 @@ import time
 
 ###################    Step 2: Define the helper functions    ###########################
 
-N = int(sys.argv[1])  #Number of fermionic sites
-theta = float(sys.argv[2]) #hoping parameter for free fermions
-theta_k = float(sys.argv[3]) #Kondo interaction
-max_trotter_steps = int(sys.argv[4]) #number of time steps
+N = 18  #Number of fermionic sites
+theta = 1.07 #hoping parameter for free fermions
+theta_k = 0.79 #Kondo interaction
+max_trotter_steps = 25 #number of time steps
 #time_corr = int(sys.argv[5]) #time for correlator functions
 
 num_qubits = 2*N + 1  #In split side configuration
@@ -345,15 +345,31 @@ def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits =
         #qc.save_statevector()  remove save for changing to operator
         return qc
 
+def reduced_dm_met(qc,index,reduced_dm_list):
+    Z_imp_observables = SparsePauliOp('I'*(N) + 'Z' + 'I'*(N))
+    X_imp_observables = SparsePauliOp('I'*(N) + 'X' + 'I'*(N))
+    Y_imp_observables = SparsePauliOp('I'*(N) + 'Y' + 'I'*(N))
 
-    
+    Z_avg = estimator.run(qc,Z_imp_observables,shots = None)
+    X_avg = estimator.run(qc,X_imp_observables,shots = None)
+    Y_avg = estimator.run(qc,Y_imp_observables,shots = None)
 
-def plot_mag_impurity(qc,index,sz_list1):
-    imp_observables = SparsePauliOp('I'*N + 'Z' + 'I'*N)
-    job_1 = estimator.run(qc,imp_observables,shots = None)
-    sz_list1.append((job_1.result().values[0],index))
-    #
-    # print("Value appended to list",job_1.result().values[0])
+    Z_values = Z_avg.result().values[0].real
+    X_values = X_avg.result().values[0].real
+    Y_values = Y_avg.result().values[0].real
+
+    dm = DensityMatrix((1/2)*(np.eye(2) + X_values*np.array([[0,1],[1,0]]) + Y_values*np.array([[0,-1j],[1j,0]]) + Z_values*np.array([[1,0],[0,-1]])))
+    reduced_dm_list.append((dm,index))
+
+
+def concurrence(dm_list, conc_list1):
+    for dm in dm_list:
+        c = purity(dm).real
+        if c>1:
+            c = 1
+            print("Purity is greater than 1,by a value of:",c-1)
+        conc_list1.append((np.sqrt(2*(1-c))).real)
+#print("Concurrence calculated successfully!")
 
 
 
@@ -370,7 +386,7 @@ sampler = Sampler()  #sampler object to sample the circuits
 sz_list1 = []
 h_list1 = []
 conc_list1 = []
-vn_list1 = []
+reduced_dm_list = []
 
 if theta_k > theta:
     print('Kondo interaction is greater than hopping parameter. Skipping over values')
@@ -382,7 +398,7 @@ else:
     qc_list = []
     #qc_list_2 = []
     for t in range(max_trotter_steps):
-        qc = circuit_3(N, t, theta,theta_k,theta_z,num_cl_bits = len(measured_bits))
+        qc = circuit_3(N, t, theta,theta_k,theta_z,num_cl_bits = len(measured_bits), trotter_barriers = True, save = True)
         qc.measure(measured_bits,list(range(len(measured_bits))))
         qc_list.append(qc)
     #super_qc_list.append((qc_list,theta,theta_k))
@@ -393,35 +409,45 @@ else:
 
     print("Super list genereted successfully! Time taken:",round(total1,2))
 
-    
-    print("Starting to calculate expectation values in a parallel fashion....")
-    t4 = time.time()
-    num_threads = 15
+    t2 = time.time()
+
+    print("Starting to calculate reduced dm in a parallel fashion....")
+    num_threads = 25
     threads = [None]*num_threads
 
     batch_size = max_trotter_steps//num_threads
     for n in range(batch_size):
-        #print(f"Batch {n+1} started")
+        
         for i in range(len(threads)):
-            threads[i] = Thread(target = plot_mag_impurity, args = (qc_list[n*num_threads + i],n*num_threads + i,sz_list1))
-            """if i == 2:
-                threads[i] = Thread(target = von_neumann_entropy, args = (reduced_dm_tomo,vn_list1))
-            if i == 3:
-                threads[i] = Thread(target = concurrence, args = (reduced_dm_tomo,conc_list1))"""
+            threads[i] = Thread(target = reduced_dm_met, args = (qc_list[n*num_threads + i],n*num_threads + i,reduced_dm_list))
             
             threads[i].start()
 
         for i in range(len(threads)):
-            threads[i].join()
+             threads[i].join()
         print(f"Batch {n+1} completed")
+    t3 = time.time()
+    total2 = t3-t2
 
-    sz_list1.sort(key = lambda x: x[1])
-    sz_list1 = [x[0] for x in sz_list1]
+    reduced_dm_list.sort(key = lambda x: x[1])
+    reduced_dm_tomo = [x[0] for x in reduced_dm_list]
+
     
+
+
+
+    
+
+    print("Reduced density matrices calculated successfully! Time taken:",round(total2,2))
+    print("Starting to calculate concurrence")
+    t4 = time.time()
+    concurrence(reduced_dm_tomo,conc_list1)
     t5 = time.time()
     total3 = t5-t4
 
-    print("Multi-threading completed successfully! Time taken:",round(total3,2))
+    print("Concurrence calculated successfully! Time taken:",round(total3,2))
+
+
 
     ###################    Step 5: Save the results in a file    ###########################
 
@@ -431,19 +457,23 @@ else:
     
 
     string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}"
-    header_sz = string + "\n TIME || S_z impurity expectation value"
+    #header_sz = string + "\n TIME || S_z impurity expectation value"
     #header_h = string + "\n TIME || H(t) expectation value"
-    #header_ent = string + "\n TIME || CONCURRENCE || VON NEUMANN"
+    header_ent = string + "\n TIME || CONCURRENCE"
 
-    data_sz = np.column_stack((time_list,sz_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
+    #data_sz = np.column_stack((time_list,sz_list1))
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
     #data_h = np.column_stack((time_list,h_list1[0]))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
-    """data_ent = np.column_stack((time_list,conc_list1,vn_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)"""
+    data_ent = np.column_stack((time_list,conc_list1))
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)
 
     #t7 = time.time()
     #total4 = t7-t6
 
     print("Results saved successfully!")
+
+
+
+
 

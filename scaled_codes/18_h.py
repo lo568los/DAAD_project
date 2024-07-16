@@ -40,14 +40,13 @@ import time
 
 ###################    Step 2: Define the helper functions    ###########################
 
-N = int(sys.argv[1])  #Number of fermionic sites
-theta = float(sys.argv[2]) #hoping parameter for free fermions
-theta_k = float(sys.argv[3]) #Kondo interaction
-max_trotter_steps = int(sys.argv[4]) #number of time steps
+N = 18  #Number of fermionic sites
+theta = 1.07 #hoping parameter for free fermions
+theta_k = 0.79 #Kondo interaction
+max_trotter_steps = 25 #number of time steps
 #time_corr = int(sys.argv[5]) #time for correlator functions
 
 num_qubits = 2*N + 1  #In split side configuration
-
 ###################    Step 3: Define all the helper functions    ###########################
 
 coeff_dict  = {}
@@ -348,12 +347,22 @@ def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits =
 
     
 
-def plot_mag_impurity(qc,index,sz_list1):
-    imp_observables = SparsePauliOp('I'*N + 'Z' + 'I'*N)
-    job_1 = estimator.run(qc,imp_observables,shots = None)
-    sz_list1.append((job_1.result().values[0],index))
-    #
-    # print("Value appended to list",job_1.result().values[0])
+H_t = 0
+H_k = 0
+for i in range(2*N):
+    if i==N-1 or i==N:
+        continue
+    else:
+        H_t += -theta*(SparsePauliOp('I'*(i) + 'XX' + 'I'*(2*N-i-1)) + SparsePauliOp('I'*(i) + 'YY' + 'I'*(2*N-i-1)))
+H_k = (-theta_k/2)*(SparsePauliOp('I'*(N-1) + 'XXX' + 'I'*(N-1))+SparsePauliOp('I'*(N-1) + 'YXY' + 'I'*(N-1)) + SparsePauliOp('I'*(N-1) + 'XYY' + 'I'*(N-1))- SparsePauliOp('I'*(N-1) + 'YYX' + 'I'*(N-1))+ SparsePauliOp('I'*(N) + 'ZZ' + 'I'*(N-1)) - SparsePauliOp('I'*(N-1) + 'ZZ' + 'I'*(N)))
+    
+def plot_hexp(qc,index,h_values1):
+    h_analytical = H_t + H_k
+        #print("Operator obtained from circuit")
+    job_analytical = estimator.run(qc,h_analytical,shots = None)
+    h_list1.append((job_analytical.result().values[0],index))
+
+    #print("Hamiltonian expectation calculated successfully!")
 
 
 
@@ -396,14 +405,14 @@ else:
     
     print("Starting to calculate expectation values in a parallel fashion....")
     t4 = time.time()
-    num_threads = 15
+    num_threads = 25
     threads = [None]*num_threads
 
     batch_size = max_trotter_steps//num_threads
     for n in range(batch_size):
-        #print(f"Batch {n+1} started")
+        #
         for i in range(len(threads)):
-            threads[i] = Thread(target = plot_mag_impurity, args = (qc_list[n*num_threads + i],n*num_threads + i,sz_list1))
+            threads[i] = Thread(target = plot_hexp, args = (qc_list[n*num_threads + i],n*num_threads + i,sz_list1))
             """if i == 2:
                 threads[i] = Thread(target = von_neumann_entropy, args = (reduced_dm_tomo,vn_list1))
             if i == 3:
@@ -412,11 +421,12 @@ else:
             threads[i].start()
 
         for i in range(len(threads)):
-            threads[i].join()
+             threads[i].join()
         print(f"Batch {n+1} completed")
 
-    sz_list1.sort(key = lambda x: x[1])
-    sz_list1 = [x[0] for x in sz_list1]
+    h_list1.sort(key = lambda x: x[1])
+    h_list1 = [i[0] for i in h_list1]
+
     
     t5 = time.time()
     total3 = t5-t4
@@ -431,14 +441,14 @@ else:
     
 
     string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}"
-    header_sz = string + "\n TIME || S_z impurity expectation value"
-    #header_h = string + "\n TIME || H(t) expectation value"
+    #header_sz = string + "\n TIME || S_z impurity expectation value"
+    header_h = string + "\n TIME || H(t) expectation value"
     #header_ent = string + "\n TIME || CONCURRENCE || VON NEUMANN"
 
-    data_sz = np.column_stack((time_list,sz_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
-    #data_h = np.column_stack((time_list,h_list1[0]))
-    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
+    #data_sz = np.column_stack((time_list,sz_list1))
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
+    data_h = np.column_stack((time_list,h_list1))
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
     """data_ent = np.column_stack((time_list,conc_list1,vn_list1))
     np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)"""
 

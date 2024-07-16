@@ -40,10 +40,10 @@ import time
 
 ###################    Step 2: Define the helper functions    ###########################
 
-N = int(sys.argv[1])  #Number of fermionic sites
-theta = float(sys.argv[2]) #hoping parameter for free fermions
-theta_k = float(sys.argv[3]) #Kondo interaction
-max_trotter_steps = int(sys.argv[4]) #number of time steps
+N = 18  #Number of fermionic sites
+theta = 1.07 #hoping parameter for free fermions
+theta_k = 0.79 #Kondo interaction
+t = 25 #time step at which you wish to calculate correlator functions
 #time_corr = int(sys.argv[5]) #time for correlator functions
 
 num_qubits = 2*N + 1  #In split side configuration
@@ -345,15 +345,42 @@ def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits =
         #qc.save_statevector()  remove save for changing to operator
         return qc
 
+imp_op = SparsePauliOp('I'*N + 'Z' + 'I'*N)
 
-    
+def ferm_mag(pos):
+    op1 = SparsePauliOp('I'*(N+pos) + 'Z' + 'I'*(N-pos))
+    op2 = SparsePauliOp('I'*(N-pos) + 'Z' + 'I'*(N+pos))
 
-def plot_mag_impurity(qc,index,sz_list1):
-    imp_observables = SparsePauliOp('I'*N + 'Z' + 'I'*N)
-    job_1 = estimator.run(qc,imp_observables,shots = None)
-    sz_list1.append((job_1.result().values[0],index))
-    #
-    # print("Value appended to list",job_1.result().values[0])
+    ferm_mag_op = 0.5*(op2 - op1)
+    #print(ferm_mag_op)
+    return ferm_mag_op
+
+def correlator_expectation2(pos,qc):
+    op1 = ferm_mag(pos)
+    corr_op = op1 @ imp_op
+    obs_list = corr_op
+    job = estimator.run(qc,obs_list,shots = None)
+    exp_vals = job.result().values[0].real
+    return exp_vals
+
+def reduced_corr(pos,qc):
+    op1 = ferm_mag(pos)
+    op2 = SparsePauliOp('I'*N + 'Z' + 'I'*N)
+    obs_list1 = op1
+    obs_list2 = op2
+    job1 = estimator.run(qc,obs_list1,shots = None)
+    job2 = estimator.run(qc,obs_list2,shots = None)
+    exp_vals1 = job1.result().values[0].real
+    exp_vals2 = job2.result().values[0].real
+    exp_vals_red = exp_vals1*exp_vals2
+    return exp_vals_red
+
+def plot_correlator(qc,pos):
+    exp_vals = correlator_expectation2(pos,qc)
+    exp_vals_red = reduced_corr(pos,qc)
+    final_vals = exp_vals - exp_vals_red
+    return final_vals
+#print("Concurrence calculated successfully!")
 
 
 
@@ -362,88 +389,68 @@ def plot_mag_impurity(qc,index,sz_list1):
 super_qc_list = []  #list to store circuits for each parameter combination
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 super_corr_list = []  #list to store correlator functions
-pos_list = list(range(N) ) #list of positions to calculate correlator functions
+pos_list = list(range(N)) #list of positions to calculate correlator functions
 
 estimator = Estimator(approximation=True) #estimator object to estimate the expectation values
 sampler = Sampler()  #sampler object to sample the circuits
 
-sz_list1 = []
-h_list1 = []
-conc_list1 = []
-vn_list1 = []
+corr_list = []  #list to store correlator functions
 
 if theta_k > theta:
     print('Kondo interaction is greater than hopping parameter. Skipping over values')
 else:
-    print('Creating super list of circuits....')
+    print('Creating circuit....')
 
     t0 = time.time()
     theta_z = -theta_k
-    qc_list = []
-    #qc_list_2 = []
-    for t in range(max_trotter_steps):
-        qc = circuit_3(N, t, theta,theta_k,theta_z,num_cl_bits = len(measured_bits))
-        qc.measure(measured_bits,list(range(len(measured_bits))))
-        qc_list.append(qc)
+    qc = circuit_3(N, t, theta,theta_k,theta_z,num_cl_bits = len(measured_bits), trotter_barriers = True, save = True)
+    qc.measure(measured_bits,list(range(len(measured_bits))))
+
+    print("Circuit depth:",qc.depth())  
+        
     #super_qc_list.append((qc_list,theta,theta_k))
 
     t1 = time.time()
 
     total1 = t1-t0
 
-    print("Super list genereted successfully! Time taken:",round(total1,2))
+    print("Circuit genereted successfully! Time taken:",round(total1,2))
 
-    
-    print("Starting to calculate expectation values in a parallel fashion....")
-    t4 = time.time()
-    num_threads = 15
-    threads = [None]*num_threads
+    print(f"Calculating the correlator functions at t = {t}....")
 
-    batch_size = max_trotter_steps//num_threads
-    for n in range(batch_size):
-        #print(f"Batch {n+1} started")
-        for i in range(len(threads)):
-            threads[i] = Thread(target = plot_mag_impurity, args = (qc_list[n*num_threads + i],n*num_threads + i,sz_list1))
-            """if i == 2:
-                threads[i] = Thread(target = von_neumann_entropy, args = (reduced_dm_tomo,vn_list1))
-            if i == 3:
-                threads[i] = Thread(target = concurrence, args = (reduced_dm_tomo,conc_list1))"""
-            
-            threads[i].start()
+    t2 = time.time()
 
-        for i in range(len(threads)):
-            threads[i].join()
-        print(f"Batch {n+1} completed")
+    for pos in pos_list:
+        corr_list.append(plot_correlator(qc,pos))
 
-    sz_list1.sort(key = lambda x: x[1])
-    sz_list1 = [x[0] for x in sz_list1]
-    
-    t5 = time.time()
-    total3 = t5-t4
+    t3 = time.time()
 
-    print("Multi-threading completed successfully! Time taken:",round(total3,2))
+    total2 = t3-t2
+    print("Correlator functions calculated successfully! Time taken:",round(total2,2))
+
 
     ###################    Step 5: Save the results in a file    ###########################
 
     #t6 = time.time()
 
-    time_list = list(range(max_trotter_steps))
-    
-
-    string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}"
-    header_sz = string + "\n TIME || S_z impurity expectation value"
+    string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, t = {t}"
+    #header_sz = string + "\n TIME || S_z impurity expectation value"
     #header_h = string + "\n TIME || H(t) expectation value"
-    #header_ent = string + "\n TIME || CONCURRENCE || VON NEUMANN"
+    header_corr = string + "\n POS || CORRELATOR FUNCTION"
 
-    data_sz = np.column_stack((time_list,sz_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
+    #data_sz = np.column_stack((time_list,sz_list1))
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
     #data_h = np.column_stack((time_list,h_list1[0]))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
-    """data_ent = np.column_stack((time_list,conc_list1,vn_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)"""
+    data_ent = np.column_stack((pos_list,corr_list))
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t= {t}_corr.txt",data_ent,header = header_corr)
 
     #t7 = time.time()
     #total4 = t7-t6
 
     print("Results saved successfully!")
+
+
+
+
 

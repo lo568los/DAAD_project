@@ -40,10 +40,10 @@ import time
 
 ###################    Step 2: Define the helper functions    ###########################
 
-N = 14  #Number of fermionic sites
+N = 22  #Number of fermionic sites
 theta = 1.07 #hoping parameter for free fermions
 theta_k = 0.79 #Kondo interaction
-max_trotter_steps = 50 #number of time steps
+max_trotter_steps = 25 #number of time steps
 #time_corr = int(sys.argv[5]) #time for correlator functions
 
 num_qubits = 2*N + 1  #In split side configuration
@@ -207,22 +207,6 @@ def fermi_state_circuit(N,num_cl_bits = 0):  #Initialize circuit with FS with bo
     qc.initialize(fermi_state_down,range(N+1,2*N+1))
     return qc
 
-def fermi_state_circuit2(num_qubits,num_cl_bits = 0):  #Initialize circuit with FS over all non-impurity sites
-    qc = QuantumCircuit(num_qubits,num_cl_bits)
-    fermi_state_up = fermi_state(int(num_qubits))
-    qc.initialize(fermi_state_up,range(int(num_qubits)))
-    return qc
-
-
-def fermion_state(N,pos_list,num_cl_bits = 0):   #Initialize state with fixed number of paricles in up or down chain
-    qc = QuantumCircuit(2*N+1,num_cl_bits)
-    for i in range(2*N+1):
-        if i in pos_list or i==N:
-            continue
-        else:
-            qc.x(i)
-    return qc
-
 def fsim(theta,phi,beta):  #Block for free fermions
     fsim = Operator([[1,0,0,0],
                    [0,m.cos(theta),1j*cm.exp(1j*beta)*m.sin(theta),0],
@@ -231,11 +215,11 @@ def fsim(theta,phi,beta):  #Block for free fermions
     return fsim
 
 def add_fsim_half(qc,angles):
-    theta = angles[0]
-    phi = angles[1]
-    beta = angles[2]
+    theta = angles
 
-    fsim1 = fsim(theta,phi,beta)
+
+    fsim1 = fsim(theta,0,0)
+    fsim2 = fsim(2*theta,0,0)
     #Adding fsim in even layers
     for i in range(0,qc.num_qubits//2-1,2):
         qc.unitary(fsim1,[i,i+1],label = r'fsim$(\theta,\phi)$')
@@ -245,24 +229,17 @@ def add_fsim_half(qc,angles):
         
     #Adding fsim in odd layers
     for i in range(1,qc.num_qubits//2-1,2):
-        qc.unitary(fsim1,[i,i+1],label = r'fsim$(\theta,\phi)$')
+        qc.unitary(fsim2,[i,i+1],label = r'fsim$(2\theta,\phi)$')
 
     for i in range(qc.num_qubits//2+2,qc.num_qubits-1,2):
-        qc.unitary(fsim1,[i,i+1],label = r'fsim$(\theta,\phi)$')
+        qc.unitary(fsim2,[i,i+1],label = r'fsim$(2\theta,\phi)$')
 
 def add_fsim_inv_half(qc,angles):
-    theta = angles[0]
-    phi = angles[1]
-    beta = angles[2]
+    theta = angles
 
-    fsim1 = fsim(theta,phi,beta)
 
-    #Adding fsim in odd layers
-    for i in range(1,qc.num_qubits//2-1,2):
-        qc.unitary(fsim1,[i,i+1],label = r'fsim$(\theta,\phi)$')
+    fsim1 = fsim(theta,0,0)
 
-    for i in range(qc.num_qubits//2+2,qc.num_qubits-1,2):
-        qc.unitary(fsim1,[i,i+1],label = r'fsim$(\theta,\phi)$')
         
     #Adding fsim in even layers
     for i in range(0,qc.num_qubits//2-1,2):
@@ -270,6 +247,28 @@ def add_fsim_inv_half(qc,angles):
 
     for i in range(qc.num_qubits//2+1,qc.num_qubits-1,2):
         qc.unitary(fsim1,[i,i+1],label = r'fsim$(\theta,\phi)$')
+
+def add_fsim_full(qc,angles):
+    theta = angles
+
+
+    fsim1 = fsim(theta,0,0)
+    fsim2 = fsim(2*theta,0,0)
+    #Adding fsim in even layers
+    for i in range(0,qc.num_qubits//2-1,2):
+        qc.unitary(fsim2,[i,i+1],label = r'fsim$(2\theta,\phi)$')
+
+    for i in range(qc.num_qubits//2+1,qc.num_qubits-1,2):
+        qc.unitary(fsim2,[i,i+1],label = r'fsim$(2\theta,\phi)$')
+        
+    #Adding fsim in odd layers
+    for i in range(1,qc.num_qubits//2-1,2):
+        qc.unitary(fsim2,[i,i+1],label = r'fsim$(2\theta,\phi)$')
+
+    for i in range(qc.num_qubits//2+2,qc.num_qubits-1,2):
+        qc.unitary(fsim2,[i,i+1],label = r'fsim$(2\theta,\phi)$')
+
+
 
 
     
@@ -314,7 +313,7 @@ def kondo_unitary(theta_k,theta_z):
     
     return kondo_unitary_2
 
-def circuit_3(N, pos_list, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits = 0, trotter_barriers = False, save = False):
+def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits = 0, trotter_barriers = False, save = False):
     if num_cl_bits == 0:
         qc = fermi_state_circuit(N)
     else:
@@ -323,128 +322,54 @@ def circuit_3(N, pos_list, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num
     qc.barrier()
     
     c = num_qubits//2
-    for i in range(trotter_steps):
+    if trotter_steps == 0:
+        if save == True:
+            qc.save_statevector()
+        return qc
+    else:
         add_fsim_half(qc,angles)
         qc.unitary(kondo_unitary(theta_k,theta_z),[c,c+1,c-1],label=r'$U_{k}(\theta_k,\theta_z)$')
-        add_fsim_inv_half(qc,angles)
+    
+   
         if trotter_barriers:
-            qc.barrier()
-    if save == True:
-        qc.save_statevector()
-    #qc.save_statevector()  remove save for changing to operator
-    return qc
+                qc.barrier()
+        for i in range(1,trotter_steps):
+            add_fsim_full(qc,angles)
+            qc.unitary(kondo_unitary(theta_k,theta_z),[c,c+1,c-1],label=r'$U_{k}(\theta_k,\theta_z)$')
+        
+            if trotter_barriers:
+                qc.barrier()
+        add_fsim_inv_half(qc,angles)
+        if save == True:
+            qc.save_statevector()
+        #qc.save_statevector()  remove save for changing to operator
+        return qc
 
-def plot_mag_impurity(super_qc_list_20,sz_list1):
-    for i in range(len(super_qc_list_20)):
-        theta = super_qc_list_20[i][1]
-        theta_k = super_qc_list_20[i][2]
-        qc_list = super_qc_list_20[i][0]
-        imp_observables = [SparsePauliOp('I'*N + 'Z' + 'I'*N)]*max_trotter_steps
-        job_1 = estimator.run(qc_list,imp_observables,shots = None)
-        sz_list1.append(list(job_1.result().values))
-    print("Impurity magnetization calculated successfully!")
-    
-H_t = 0
-H_k = 0
-for i in range(2*N):
-    if i==N-1 or i==N:
-        continue
-    else:
-        H_t += -theta*(SparsePauliOp('I'*(i) + 'XX' + 'I'*(2*N-i-1)) + SparsePauliOp('I'*(i) + 'YY' + 'I'*(2*N-i-1)))
-H_k = (-theta_k/2)*(SparsePauliOp('I'*(N-1) + 'XXX' + 'I'*(N-1))+SparsePauliOp('I'*(N-1) + 'YXY' + 'I'*(N-1)) + SparsePauliOp('I'*(N-1) + 'XYY' + 'I'*(N-1))- SparsePauliOp('I'*(N-1) + 'YYX' + 'I'*(N-1))+ SparsePauliOp('I'*(N) + 'ZZ' + 'I'*(N-1)) - SparsePauliOp('I'*(N-1) + 'ZZ' + 'I'*(N)))
-    
-def plot_hexp(super_qc_list_50,h_values1):
+def reduced_dm_met(qc,index,reduced_dm_list):
+    Z_imp_observables = SparsePauliOp('I'*(N) + 'Z' + 'I'*(N))
+    X_imp_observables = SparsePauliOp('I'*(N) + 'X' + 'I'*(N))
+    Y_imp_observables = SparsePauliOp('I'*(N) + 'Y' + 'I'*(N))
 
+    Z_avg = estimator.run(qc,Z_imp_observables,shots = None)
+    X_avg = estimator.run(qc,X_imp_observables,shots = None)
+    Y_avg = estimator.run(qc,Y_imp_observables,shots = None)
 
-    for i in range(len(super_qc_list_50)):
-        theta = super_qc_list_50[i][1]
-        theta_k = super_qc_list_50[i][2]
-        qc_list = super_qc_list_50[i][0]
+    Z_values = Z_avg.result().values[0].real
+    X_values = X_avg.result().values[0].real
+    Y_values = Y_avg.result().values[0].real
 
-        h_analytical = [H_t + H_k]*max_trotter_steps
-        #print("Operator obtained from circuit")
-        job_analytical = estimator.run(qc_list,h_analytical,shots = None)
-        h_values1.append(list(job_analytical.result().values))
-
-    print("Hamiltonian expectation calculated successfully!")
-    
-imp_op = SparsePauliOp('I'*N + 'Z' + 'I'*N)
-
-def ferm_mag(pos):
-    op1 = SparsePauliOp('I'*(N+pos) + 'Z' + 'I'*(N-pos))
-    op2 = SparsePauliOp('I'*(N-pos) + 'Z' + 'I'*(N+pos))
-
-    ferm_mag_op = 0.5*(op2 - op1)
-    #print(ferm_mag_op)
-    return ferm_mag_op
-
-def correlator_expectation2(pos,qc_list):
-    op1 = ferm_mag(pos)
-    corr_op = op1 @ imp_op
-    obs_list = [corr_op]*max_trotter_steps
-    job = estimator.run(qc_list,obs_list,shots = None)
-    exp_vals = list(job.result().values)
-    return exp_vals
-
-def reduced_corr(pos,qc_list):
-    op1 = ferm_mag(pos)
-    op2 = SparsePauliOp('I'*N + 'Z' + 'I'*N)
-    obs_list1 = [op1]*max_trotter_steps
-    obs_list2 = [op2]*max_trotter_steps
-    job1 = estimator.run(qc_list,obs_list1,shots = None)
-    job2 = estimator.run(qc_list,obs_list2,shots = None)
-    exp_vals1 = list(job1.result().values)
-    exp_vals2 = list(job2.result().values)
-    exp_vals_red = [a*b for a,b in zip(exp_vals1,exp_vals2)]
-    return exp_vals_red
-
-def plot_correlator(qc_list,pos):
-    exp_vals = correlator_expectation2(pos,qc_list)
-    exp_vals_red = reduced_corr(pos,qc_list)
-    final_vals = [a-b for a,b in zip(exp_vals,exp_vals_red)]
-    return final_vals
-
-def trace_norm(density_matrix):
-    density_matrix = np.array(density_matrix)
-    eigenvalues, eigenvectors = np.linalg.eig(density_matrix)
-    sum = 0
-    #print(eigenvalues)
-    for i in eigenvalues:
-        if i.real < 0:
-            sum += i.real
-    #print(sum)
-    return abs(sum)
-
-def calculate_entropy(rho):
-    rho = np.array(rho)
-    R = rho*(la.logm(rho))
-    S = -np.matrix.trace(R)
-    return S
+    dm = DensityMatrix((1/2)*(np.eye(2) + X_values*np.array([[0,1],[1,0]]) + Y_values*np.array([[0,-1j],[1j,0]]) + Z_values*np.array([[1,0],[0,-1]])))
+    reduced_dm_list.append((dm,index))
 
 
-def von_neumann_entropy(reduced_dm_list, vn_list1):
-    for dm in reduced_dm_list:
-        entropy = calculate_entropy(dm)
-        vn_list1.append(entropy.real)
-    print("Von Neumann entropy calculated successfully!")
-
-def negativity(density_matrix_list):
-    neg_list = []
-    for density_matrix in density_matrix_list:
-        dm_pt = density_matrix.partial_transpose([N])
-        neg = trace_norm(dm_pt)
-        #print(neg)
-        neg_list.append(neg.real)
-    return neg_list
-
-def concurrence(reduced_dm_list, conc_list1):
-    for dm in reduced_dm_list:
+def concurrence(dm_list, conc_list1):
+    for dm in dm_list:
         c = purity(dm).real
         if c>1:
             c = 1
             print("Purity is greater than 1,by a value of:",c-1)
         conc_list1.append((np.sqrt(2*(1-c))).real)
-    print("Concurrence calculated successfully!")
+#print("Concurrence calculated successfully!")
 
 
 
@@ -461,7 +386,7 @@ sampler = Sampler()  #sampler object to sample the circuits
 sz_list1 = []
 h_list1 = []
 conc_list1 = []
-vn_list1 = []
+reduced_dm_list = []
 
 if theta_k > theta:
     print('Kondo interaction is greater than hopping parameter. Skipping over values')
@@ -471,12 +396,12 @@ else:
     t0 = time.time()
     theta_z = -theta_k
     qc_list = []
-    qc_list_2 = []
+    #qc_list_2 = []
     for t in range(max_trotter_steps):
-        qc = circuit_3(N,[0,1,2*N], t, [theta,0,0],theta_k,theta_z,num_cl_bits = len(measured_bits), trotter_barriers = True, save = True)
+        qc = circuit_3(N, t, theta,theta_k,theta_z,num_cl_bits = len(measured_bits), trotter_barriers = True, save = True)
         qc.measure(measured_bits,list(range(len(measured_bits))))
         qc_list.append(qc)
-    super_qc_list.append((qc_list,theta,theta_k))
+    #super_qc_list.append((qc_list,theta,theta_k))
 
     t1 = time.time()
 
@@ -484,51 +409,45 @@ else:
 
     print("Super list genereted successfully! Time taken:",round(total1,2))
 
-    """t2 = time.time()
+    t2 = time.time()
 
-    Z_imp_observables = [SparsePauliOp('I'*(N) + 'Z' + 'I'*(N))]*max_trotter_steps
-    X_imp_observables = [SparsePauliOp('I'*(N) + 'X' + 'I'*(N))]*max_trotter_steps
-    Y_imp_observables = [SparsePauliOp('I'*(N) + 'Y' + 'I'*(N))]*max_trotter_steps
+    print("Starting to calculate reduced dm in a parallel fashion....")
+    num_threads = 25
+    threads = [None]*num_threads
 
-    Z_avg = estimator.run(super_qc_list[0][0],Z_imp_observables,shots = 1000)
-    X_avg = estimator.run(super_qc_list[0][0],X_imp_observables,shots = 1000)
-    Y_avg = estimator.run(super_qc_list[0][0],Y_imp_observables,shots = 1000)
+    batch_size = max_trotter_steps//num_threads
+    for n in range(batch_size):
+        
+        for i in range(len(threads)):
+            threads[i] = Thread(target = reduced_dm_met, args = (qc_list[n*num_threads + i],n*num_threads + i,reduced_dm_list))
+            
+            threads[i].start()
 
-    Z_values = [x.real for x in list(Z_avg.result().values)]
-    X_values = [x.real for x in list(X_avg.result().values)]
-    Y_values = [x.real for x in list(Y_avg.result().values)]
-
-    reduced_dm_tomo = []
-    for i in range(max_trotter_steps):
-        reduced_dm = DensityMatrix((1/2)*(np.eye(2) + X_values[i]*np.array([[0,1],[1,0]]) + Y_values[i]*np.array([[0,-1j],[1j,0]]) + Z_values[i]*np.array([[1,0],[0,-1]])))
-        reduced_dm_tomo.append(reduced_dm)
-
+        for i in range(len(threads)):
+             threads[i].join()
+        print(f"Batch {n+1} completed")
     t3 = time.time()
     total2 = t3-t2
 
-    print("Reduced density matrices calculated successfully! Time taken:",round(total2,2))"""
-    print("Starting to calculate expectation values in a parallel fashion....")
-    t4 = time.time()
-    threads = [None]*2
+    reduced_dm_list.sort(key = lambda x: x[1])
+    reduced_dm_tomo = [x[0] for x in reduced_dm_list]
 
-    for i in range(len(threads)):
-        if i == 0:
-            threads[i] = Thread(target = plot_mag_impurity, args = (super_qc_list,sz_list1))
-        if i == 1:
-            threads[i] = Thread(target = plot_hexp, args = (super_qc_list,h_list1))
-        """if i == 2:
-            threads[i] = Thread(target = von_neumann_entropy, args = (reduced_dm_tomo,vn_list1))
-        if i == 3:
-            threads[i] = Thread(target = concurrence, args = (reduced_dm_tomo,conc_list1))"""
-        threads[i].start()
-
-    for i in range(len(threads)):
-        threads[i].join()
     
+
+
+
+    
+
+    print("Reduced density matrices calculated successfully! Time taken:",round(total2,2))
+    print("Starting to calculate concurrence")
+    t4 = time.time()
+    concurrence(reduced_dm_tomo,conc_list1)
     t5 = time.time()
     total3 = t5-t4
 
-    print("Multi-threading completed successfully! Time taken:",round(total3,2))
+    print("Concurrence calculated successfully! Time taken:",round(total3,2))
+
+
 
     ###################    Step 5: Save the results in a file    ###########################
 
@@ -538,19 +457,23 @@ else:
     
 
     string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}"
-    header_sz = string + "\n TIME || S_z impurity expectation value"
-    header_h = string + "\n TIME || H(t) expectation value"
-    header_ent = string + "\n TIME || CONCURRENCE || VON NEUMANN"
+    #header_sz = string + "\n TIME || S_z impurity expectation value"
+    #header_h = string + "\n TIME || H(t) expectation value"
+    header_ent = string + "\n TIME || CONCURRENCE"
 
-    data_sz = np.column_stack((time_list,sz_list1[0]))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
-    data_h = np.column_stack((time_list,h_list1[0]))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
-    """data_ent = np.column_stack((time_list,conc_list1,vn_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)"""
+    #data_sz = np.column_stack((time_list,sz_list1))
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
+    #data_h = np.column_stack((time_list,h_list1[0]))
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
+    data_ent = np.column_stack((time_list,conc_list1))
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)
 
     #t7 = time.time()
     #total4 = t7-t6
 
     print("Results saved successfully!")
+
+
+
+
 

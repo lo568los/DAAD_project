@@ -40,10 +40,10 @@ import time
 
 ###################    Step 2: Define the helper functions    ###########################
 
-N = int(sys.argv[1])  #Number of fermionic sites
-theta = float(sys.argv[2]) #hoping parameter for free fermions
-theta_k = float(sys.argv[3]) #Kondo interaction
-max_trotter_steps = int(sys.argv[4]) #number of time steps
+N = 22  #Number of fermionic sites
+theta = 1.07 #hoping parameter for free fermions
+theta_k = 0.79 #Kondo interaction
+max_trotter_steps = 25 #number of time steps
 #time_corr = int(sys.argv[5]) #time for correlator functions
 
 num_qubits = 2*N + 1  #In split side configuration
@@ -396,7 +396,7 @@ else:
     
     print("Starting to calculate expectation values in a parallel fashion....")
     t4 = time.time()
-    num_threads = 15
+    num_threads = 25
     threads = [None]*num_threads
 
     batch_size = max_trotter_steps//num_threads
