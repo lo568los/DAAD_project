@@ -375,11 +375,12 @@ def reduced_corr(pos,qc):
     exp_vals_red = exp_vals1*exp_vals2
     return exp_vals_red
 
-def plot_correlator(qc,pos):
+def plot_correlator(qc,pos, corr_list):
     exp_vals = correlator_expectation2(pos,qc)
     exp_vals_red = reduced_corr(pos,qc)
     final_vals = exp_vals - exp_vals_red
-    return final_vals
+    corr_list.append((final_vals.real,pos))
+    #return final_vals
 #print("Concurrence calculated successfully!")
 
 
@@ -389,12 +390,13 @@ def plot_correlator(qc,pos):
 super_qc_list = []  #list to store circuits for each parameter combination
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 super_corr_list = []  #list to store correlator functions
-pos_list = list(range(N)) #list of positions to calculate correlator functions
+pos_list = list(range(1,N+1)) #list of positions to calculate correlator functions
 
 estimator = Estimator(approximation=True) #estimator object to estimate the expectation values
 sampler = Sampler()  #sampler object to sample the circuits
 
 corr_list = []  #list to store correlator functions
+  #list to store final values of correlator functions
 
 if theta_k > theta:
     print('Kondo interaction is greater than hopping parameter. Skipping over values')
@@ -420,8 +422,18 @@ else:
 
     t2 = time.time()
 
+    num_threads = len(pos_list)
+    threads = [None]*num_threads
+
     for pos in pos_list:
-        corr_list.append(plot_correlator(qc,pos))
+        threads[pos-1] = Thread(target = plot_correlator, args = (qc,pos, corr_list))
+        threads[pos-1].start()
+
+    for pos in pos_list:
+        threads[pos-1].join()
+
+    corr_list.sort(key = lambda x: x[1])
+    corr_list = [x[0] for x in corr_list]
 
     t3 = time.time()
 

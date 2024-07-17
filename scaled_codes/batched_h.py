@@ -368,7 +368,7 @@ def plot_hexp(qc,index,h_values1):
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-
+print(f"Starting the hexp code for N = {N} and t = {max_trotter_steps}....")
 super_qc_list = []  #list to store circuits for each parameter combination
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 super_corr_list = []  #list to store correlator functions
@@ -389,19 +389,45 @@ else:
 
     t0 = time.time()
     theta_z = -theta_k
-    qc_list = []
-    #qc_list_2 = []
-    for t in range(max_trotter_steps):
-        qc = circuit_3(N, t, theta,theta_k,theta_z,num_cl_bits = len(measured_bits))
-        qc.measure(measured_bits,list(range(len(measured_bits))))
-        qc_list.append(qc)
-    #super_qc_list.append((qc_list,theta,theta_k))
+    qc_list = [0]*max_trotter_steps
+    qc_list2 = [0]*max_trotter_steps
+
+    t0 = time.time()
+    theta_z = -theta_k
+    
+    qc_list2[0] = circuit_3(N, 0, theta,theta_k,theta_z)
+    qc_list[0] = qc_list2[0].copy()
+    c = num_qubits//2
+    for t in range(1,max_trotter_steps):
+        #print("Value of t:", t)
+        qc = qc_list2[t-1].copy()
+        if t == 1:
+            add_fsim_half(qc,theta)
+            qc.unitary(kondo_unitary(theta_k,theta_z),[c,c+1,c-1],label=r'$U_{k}(\theta_k,\theta_z)$')
+        else:
+            add_fsim_full(qc,theta)
+            qc.unitary(kondo_unitary(theta_k,theta_z),[c,c+1,c-1],label=r'$U_{k}(\theta_k,\theta_z)$')
+        qc.barrier()
+
+                
+                #qc.measure(measured_bits,list(range(len(measured_bits))))
+
+            
+        #print("QC DEpth for list2:",qc.depth())   
+        qc_list2[t] = qc.copy()
+        #print(qc_list2[t].depth())
+        add_fsim_inv_half(qc,theta)
+        #print("QC DEpth for list1:",qc.depth())   
+        qc_list[t] = qc.copy()
+        #print(qc_list[t].depth())
+        del qc
 
     t1 = time.time()
 
     total1 = t1-t0
 
     print("Super list genereted successfully! Time taken:",round(total1,2))
+
 
     
     print("Starting to calculate expectation values in a parallel fashion....")
@@ -411,7 +437,7 @@ else:
 
     batch_size = max_trotter_steps//num_threads
     for n in range(batch_size):
-        #
+        print(f"Batch {n+1} started")
         for i in range(len(threads)):
             threads[i] = Thread(target = plot_hexp, args = (qc_list[n*num_threads + i],n*num_threads + i,sz_list1))
             """if i == 2:

@@ -369,12 +369,21 @@ def concurrence(dm_list, conc_list1):
             c = 1
             print("Purity is greater than 1,by a value of:",c-1)
         conc_list1.append((np.sqrt(2*(1-c))).real)
+
+def entanglement_entropy(dm_list, vne_list1):
+    for dm in dm_list:
+        eigvals = la.eigvalsh(dm)
+        vne = 0
+        for eigval in eigvals:
+            if eigval > 0:
+                vne += -eigval*np.log(eigval)
+        vne_list1.append(vne.real)
 #print("Concurrence calculated successfully!")
 
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-
+print(f"Starting the main code for N = {N} and t = {max_trotter_steps}....")
 super_qc_list = []  #list to store circuits for each parameter combination
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 super_corr_list = []  #list to store correlator functions
@@ -386,6 +395,7 @@ sampler = Sampler()  #sampler object to sample the circuits
 sz_list1 = []
 h_list1 = []
 conc_list1 = []
+vne_list1 = []
 reduced_dm_list = []
 
 if theta_k > theta:
@@ -417,8 +427,10 @@ else:
 
     batch_size = max_trotter_steps//num_threads
     for n in range(batch_size):
+        print(f"Batch {n+1} started")
         
         for i in range(len(threads)):
+        
             threads[i] = Thread(target = reduced_dm_met, args = (qc_list[n*num_threads + i],n*num_threads + i,reduced_dm_list))
             
             threads[i].start()
@@ -439,9 +451,10 @@ else:
     
 
     print("Reduced density matrices calculated successfully! Time taken:",round(total2,2))
-    print("Starting to calculate concurrence")
+    print("Starting to calculate concurrence and VNE....")
     t4 = time.time()
     concurrence(reduced_dm_tomo,conc_list1)
+    entanglement_entropy(reduced_dm_tomo,vne_list1)
     t5 = time.time()
     total3 = t5-t4
 
@@ -459,13 +472,13 @@ else:
     string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, max_trotter_steps = {max_trotter_steps}"
     #header_sz = string + "\n TIME || S_z impurity expectation value"
     #header_h = string + "\n TIME || H(t) expectation value"
-    header_ent = string + "\n TIME || CONCURRENCE"
+    header_ent = string + "\n TIME || CONCURRENCE || VON NEUMANN ENTROPY"
 
     #data_sz = np.column_stack((time_list,sz_list1))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
     #data_h = np.column_stack((time_list,h_list1[0]))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
-    data_ent = np.column_stack((time_list,conc_list1))
+    data_ent = np.column_stack((time_list,conc_list1, vne_list1))
     np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)
 
     #t7 = time.time()

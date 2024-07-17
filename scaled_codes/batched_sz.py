@@ -358,7 +358,7 @@ def plot_mag_impurity(qc,index,sz_list1):
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-print(f"Sz results for N = {N}, and t = {max_trotter_steps})
+print(f"Sz results for N = {N}, and t = {max_trotter_steps}")
 
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 
@@ -387,7 +387,7 @@ else:
     qc_list[0] = qc_list2[0].copy()
     c = num_qubits//2
     for t in range(1,max_trotter_steps):
-        print("Value of t:", t)
+        #print("Value of t:", t)
         qc = qc_list2[t-1].copy()
         if t == 1:
             add_fsim_half(qc,theta)
