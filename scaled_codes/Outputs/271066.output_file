@@ -1,0 +1,8 @@
+Creating super list of circuits....
+Super list genereted successfully! Time taken: 21.04
+Starting to calculate reduced dm in a parallel fashion....
+Batch 1 completed
+Reduced density matrices calculated successfully! Time taken: 40752.45
+Starting to calculate concurrence
+Concurrence calculated successfully! Time taken: 0.01
+Results saved successfully!
