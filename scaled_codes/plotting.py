@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 N_list = [10]
 theta_list = [1.07]  #pass the true values here
 thetak_list = [0.79]
-max_trotter_steps = 10
+max_trotter_steps = 25
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -44,15 +44,15 @@ for N in N_list:
                 #data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = 0.79, theta_k = 0.53_corr.txt")
                 #data4 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
                 sz_vals = data1[:,1]
-                """h_vals = data2[:,1]
-                conc_vals = data4[:,1]
-                vne_vals = data4[:,2]
+                h_vals = data2[:,1]
+                #conc_vals = data4[:,1]
+                #vne_vals = data4[:,2]
                 #conc_vals = [x.real for x in conc_vals]
                 #vne_vals = [y.real for y in conc_vals]
 
                 corr_super = []
                 for i in range(1,N+1):
-                    corr_super.append(data3[:,i])"""
+                    corr_super.append(data3[:,i])
 
 
 
@@ -66,15 +66,15 @@ for N in N_list:
                 plt.savefig(f"scaled_codes/plots/Sz plot, N = {N}", dpi =500)
                 plt.close()
 
-                """plt.plot(range(max_trotter_steps),h_vals)
+                plt.plot(range(max_trotter_steps),h_vals)
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"$\langle H \rangle (t)$")
                 plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
                 plt.savefig(f"scaled_codes/plots/H_exp plot, N = {N}", dpi =500)
                 plt.close()
 
-                plt.plot(range(max_trotter_steps),conc_vals, label = "Concurrence")
-                plt.plot(range(max_trotter_steps),vne_vals, label = "Von Neumann")
+                """plt.plot(range(max_trotter_steps),conc_vals, label = "Concurrence")
+                #plt.plot(range(max_trotter_steps),vne_vals, label = "Von Neumann")
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"Entanglement between subsystems")
                 plt.title(f"Entanglement measures between impurity and leads for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")

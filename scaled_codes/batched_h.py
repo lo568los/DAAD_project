@@ -406,7 +406,7 @@ else:
     
     print("Starting to calculate expectation values in a parallel fashion....")
     t4 = time.time()
-    num_threads = 10
+    num_threads = 50
     threads = [None]*num_threads
 
     batch_size = max_trotter_steps//num_threads

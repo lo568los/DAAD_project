@@ -412,7 +412,7 @@ else:
     t2 = time.time()
 
     print("Starting to calculate reduced dm in a parallel fashion....")
-    num_threads = 10
+    num_threads = 50
     threads = [None]*num_threads
 
     batch_size = max_trotter_steps//num_threads
