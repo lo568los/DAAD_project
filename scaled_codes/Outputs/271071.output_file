@@ -1,0 +1,6 @@
+Creating super list of circuits....
+Super list genereted successfully! Time taken: 42.57
+Starting to calculate expectation values in a parallel fashion....
+Batch 1 completed
+Multi-threading completed successfully! Time taken: 34848.2
+Results saved successfully!

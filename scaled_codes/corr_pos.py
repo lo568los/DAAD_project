@@ -358,18 +358,15 @@ def ferm_mag(pos):
 def correlator_expectation2(pos,qc):
     op1 = ferm_mag(pos)
     corr_op = op1 @ imp_op
-    obs_list = corr_op
-    job = estimator.run(qc,obs_list,shots = None)
+    job = estimator.run(qc,corr_op,shots = None)
     exp_vals = job.result().values[0].real
     return exp_vals
 
 def reduced_corr(pos,qc):
     op1 = ferm_mag(pos)
     op2 = SparsePauliOp('I'*N + 'Z' + 'I'*N)
-    obs_list1 = op1
-    obs_list2 = op2
-    job1 = estimator.run(qc,obs_list1,shots = None)
-    job2 = estimator.run(qc,obs_list2,shots = None)
+    job1 = estimator.run(qc,op1,shots = None)
+    job2 = estimator.run(qc,op2,shots = None)
     exp_vals1 = job1.result().values[0].real
     exp_vals2 = job2.result().values[0].real
     exp_vals_red = exp_vals1*exp_vals2

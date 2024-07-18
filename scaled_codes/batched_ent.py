@@ -313,11 +313,27 @@ def kondo_unitary(theta_k,theta_z):
     
     return kondo_unitary_2
 
+def ts_state_circuit(N, num_cl_bits = 0):  #Initialize state with fixed number of paricles in up or down chain
+    qc = QuantumCircuit(2*N+1,num_cl_bits)
+    str1 = ''
+    str2 = ''
+    for i in range(N):
+        if i%2 == 0:
+            str1 += '1'
+            str2 += '0'
+        else:
+            str1 += '0'
+            str2 += '1'
+    state = (Statevector.from_label(str1) + Statevector.from_label(str2))/np.sqrt(2)
+    qc.initialize(state,range(N))
+    qc.initialize(state,range(N+1,2*N+1))
+    return qc
+
 def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits = 0, trotter_barriers = False, save = False):
     if num_cl_bits == 0:
-        qc = fermi_state_circuit(N)
+        qc = ts_state_circuit(N)
     else:
-        qc = fermi_state_circuit(N,num_cl_bits)
+        qc = ts_state_circuit(N,num_cl_bits)
     qc.x(N)
     qc.barrier()
     
@@ -381,7 +397,7 @@ def entanglement_entropy(dm_list, vne_list1):
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-print(f"Starting the ent code for N = {N} and t = {max_trotter_steps}....")
+print(f"Starting the ent code for N = {N} and t = {max_trotter_steps} and TS State....")
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 
 pos_list = list(range(N) ) #list of positions to calculate correlator functions
@@ -443,7 +459,7 @@ else:
     t2 = time.time()
 
     print("Starting to calculate reduced dm in a parallel fashion....")
-    num_threads = 5
+    num_threads = max_trotter_steps
     threads = [None]*num_threads
 
     batch_size = max_trotter_steps//num_threads

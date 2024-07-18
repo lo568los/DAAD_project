@@ -6,7 +6,7 @@ do
     do
         for thetak_loop in 0.79
         do
-            for steps_loop in 0 25 50
+            for steps_loop in 25 50
             do
 
                 sed -i "s/N=.*/N=${Nloop}/g" SubmitJob_corr.ll

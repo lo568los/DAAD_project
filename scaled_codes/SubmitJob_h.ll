@@ -6,15 +6,15 @@
 #@ error  = Errors/$(jobid).error_file      
 #@ tasks_per_node = 100
 #@ environment = COPY_ALL                   
-#@ class = 128core
+#@ class = 128core_2023
 #@ notification = complete
 #@ notify_user = e.koenig@fkf.mpg.de
 #@ queue 
 
 export OMP_NUM_THREADS=100
 N=10
-theta=1.07
-theta_k=0.79
+theta=0.79
+theta_k=0.52
 max_trotter_steps=100
 
 

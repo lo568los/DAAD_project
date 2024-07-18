@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
-N_list = [10]
+N_list = [6]
 theta_list = [1.07]  #pass the true values here
 thetak_list = [0.79]
-max_trotter_steps = 25
+max_trotter_steps = 50
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -39,27 +39,30 @@ for N in N_list:
             else:
 
 
-                data1 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
+                #data1 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
                 #data2 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt")
                 #data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = 0.79, theta_k = 0.53_corr.txt")
-                #data4 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
-                sz_vals = data1[:,1]
-                h_vals = data2[:,1]
-                #conc_vals = data4[:,1]
+                data4 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
+                data5 = np.loadtxt(f"scaled_codes/data/N = 10, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
+
+                #sz_vals = data1[:,1]
+                #h_vals = data2[:,1]
+                conc_vals1 = data4[:,1]
+                conc_vals2 = data5[:,1]
                 #vne_vals = data4[:,2]
                 #conc_vals = [x.real for x in conc_vals]
                 #vne_vals = [y.real for y in conc_vals]
 
-                corr_super = []
+                """corr_super = []
                 for i in range(1,N+1):
-                    corr_super.append(data3[:,i])
+                    corr_super.append(data3[:,i])"""
 
 
 
 
 ###################    Step 3: Plot the data   ###########################
 
-                plt.plot(range(max_trotter_steps),sz_vals)
+                """plt.plot(range(max_trotter_steps),sz_vals)
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"$\langle S^z_{imp}(t)\rangle$")
                 plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
@@ -71,16 +74,18 @@ for N in N_list:
                 plt.ylabel(r"$\langle H \rangle (t)$")
                 plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
                 plt.savefig(f"scaled_codes/plots/H_exp plot, N = {N}", dpi =500)
-                plt.close()
+                plt.close()"""
 
-                """plt.plot(range(max_trotter_steps),conc_vals, label = "Concurrence")
+                plt.plot(range(max_trotter_steps),conc_vals1[:50], label = "N=6")
+                plt.plot(range(max_trotter_steps),conc_vals2, label = "N=10")
                 #plt.plot(range(max_trotter_steps),vne_vals, label = "Von Neumann")
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"Entanglement between subsystems")
-                plt.title(f"Entanglement measures between impurity and leads for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
                 plt.legend()
-                plt.savefig(f"scaled_codes/plots/Entanglement plot, N = {N}", dpi = 500)
-                plt.close()"""
+                plt.title(f"Entanglement measures between impurity and leads, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
+                plt.legend()
+                plt.savefig(f"scaled_codes/plots/Entanglement plot FOR DIFFERENT N", dpi = 500)
+                plt.close()
 
 
             """"""

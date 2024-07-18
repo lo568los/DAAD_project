@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 
 
 
-N_list = [6]
+N_list = [10]
 theta_list = [1.07]  #pass the true values here
 thetak_list = [0.79]
-max_trotter_steps = 5
+max_trotter_steps = 25
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -35,7 +35,7 @@ for N in N_list:
             if theta_k > theta:
                 continue
             else:
-                data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = 0.79, theta_k = 0.53_corr.txt")
+                data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = 0.79, theta_k = 0.53, t = 25_corr.txt")
                 corr_super = []
                 for i in range(1,N+1):
                     corr_super.append(data3[:,i])
