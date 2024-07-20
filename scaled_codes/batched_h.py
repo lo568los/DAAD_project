@@ -331,9 +331,9 @@ def ts_state_circuit(N, num_cl_bits = 0):  #Initialize state with fixed number o
 
 def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits = 0, trotter_barriers = False, save = False):
     if num_cl_bits == 0:
-        qc = ts_state_circuit(N)
+        qc = fermi_state_circuit(N)
     else:
-        qc = ts_state_circuit(N,num_cl_bits)
+        qc = fermi_state_circuit(N,num_cl_bits)
     qc.x(N)
     qc.barrier()
     
@@ -373,18 +373,18 @@ for i in range(2*N):
         H_t += -theta*(SparsePauliOp('I'*(i) + 'XX' + 'I'*(2*N-i-1)) + SparsePauliOp('I'*(i) + 'YY' + 'I'*(2*N-i-1)))
 H_k = (-theta_k/2)*(SparsePauliOp('I'*(N-1) + 'XXX' + 'I'*(N-1))+SparsePauliOp('I'*(N-1) + 'YXY' + 'I'*(N-1)) + SparsePauliOp('I'*(N-1) + 'XYY' + 'I'*(N-1))- SparsePauliOp('I'*(N-1) + 'YYX' + 'I'*(N-1))+ SparsePauliOp('I'*(N) + 'ZZ' + 'I'*(N-1)) - SparsePauliOp('I'*(N-1) + 'ZZ' + 'I'*(N)))
     
-def plot_hexp(qc,index,h_values1):
+def plot_hexp(qc,index,h_list1):
     h_analytical = H_t + H_k
         #print("Operator obtained from circuit")
     job_analytical = estimator.run(qc,h_analytical,shots = None)
-    h_list1.append((job_analytical.result().values[0],index))
+    h_list1[index] = job_analytical.result().values[0]
 
     #print("Hamiltonian expectation calculated successfully!")
 
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-print(f"Starting the hexp code for N = {N} and t = {max_trotter_steps} and TS State....")
+print(f"Starting the hexp code for N = {N} and t = {max_trotter_steps}")
 super_qc_list = []  #list to store circuits for each parameter combination
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 super_corr_list = []  #list to store correlator functions
@@ -393,8 +393,8 @@ pos_list = list(range(N) ) #list of positions to calculate correlator functions
 estimator = Estimator(approximation=True) #estimator object to estimate the expectation values
 sampler = Sampler()  #sampler object to sample the circuits
 
-sz_list1 = []
-h_list1 = []
+sz_list1 = [0]*max_trotter_steps
+h_list1 = [0]*max_trotter_steps
 conc_list1 = []
 vn_list1 = []
 
@@ -455,7 +455,7 @@ else:
     for n in range(batch_size):
         print(f"Batch {n+1} started")
         for i in range(len(threads)):
-            threads[i] = Thread(target = plot_hexp, args = (qc_list[n*num_threads + i],n*num_threads + i,sz_list1))
+            threads[i] = Thread(target = plot_hexp, args = (qc_list[n*num_threads + i],n*num_threads + i,h_list1))
             """if i == 2:
                 threads[i] = Thread(target = von_neumann_entropy, args = (reduced_dm_tomo,vn_list1))
             if i == 3:
@@ -467,8 +467,8 @@ else:
              threads[i].join()
         print(f"Batch {n+1} completed")
 
-    h_list1.sort(key = lambda x: x[1])
-    h_list1 = [i[0] for i in h_list1]
+    #h_list1.sort(key = lambda x: x[1])
+    #h_list1 = [i[0] for i in h_list1]
 
     
     t5 = time.time()

@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
 N_list = [10]
-theta_list = [1.07]  #pass the true values here
-thetak_list = [0.79]
+theta_list = [0.79]  #pass the true values here
+thetak_list = [0.52]
 max_trotter_steps = 100
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
@@ -39,12 +39,13 @@ for N in N_list:
             else:
 
 
-                data1 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
-                data2 = np.loadtxt(f"scaled_codes/data/N = 10, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
+                data1 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz_TS.txt")
+                data2 = np.loadtxt(f"scaled_codes/data/N = 10, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz_TS.txt")
                 #data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = 0.79, theta_k = 0.53_corr.txt")
                 #data4 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
                 sz_vals1 = data1[:,1]
                 sz_vals2 = data2[:,1]
+                
                 #conc_vals = data4[:,1]
                 #vne_vals = data4[:,2]
                 #conc_vals = [x.real for x in conc_vals]
@@ -59,13 +60,13 @@ for N in N_list:
 
 ###################    Step 3: Plot the data   ###########################
 
-                plt.plot(range(max_trotter_steps),sz_vals1, label = "N=6")
-                plt.plot(range(max_trotter_steps),sz_vals2, label = "N=10")
+                plt.plot(range(max_trotter_steps),sz_vals1, label = "N=6, TS state")
+                plt.plot(range(max_trotter_steps),sz_vals2, label = "N=10, TS state")
                 plt.xlabel("Time(trotter steps)")
                 plt.legend()
                 plt.ylabel(r"$\langle S^z_{imp}(t)\rangle$")
-                plt.title(f"Impurity magnetization v/s time for theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
-                plt.savefig(f"scaled_codes/plots/Sz_compare_plot", dpi =500)
+                plt.title(f"Impurity magnetization v/s time for " +  r'$\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
+                plt.savefig(f"scaled_codes/plots/Sz_compare_state_plot", dpi =500)
                 plt.close()
 
                 

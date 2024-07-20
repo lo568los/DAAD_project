@@ -30,7 +30,7 @@ def plot_corr_time(t, corr_super): # For corr vs pos
     plt.savefig(f"scaled_codes/plots/Correlator space, N = {N}")
     plt.close()
 
-
+i = 0
 for N in N_list:
     for theta in theta_list:
         for theta_k in thetak_list:
@@ -44,7 +44,8 @@ for N in N_list:
                 #data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = 0.79, theta_k = 0.53_corr.txt")
                 #data4 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
                 sz_vals1 = data1[:,1]/6
-                sz_vals2 = data2[:,1]/10
+                sz_vals2 = data2[:,1]/6
+                i+=1
                 #conc_vals = data4[:,1]
                 #vne_vals = data4[:,2]
                 #conc_vals = [x.real for x in conc_vals]
@@ -59,13 +60,13 @@ for N in N_list:
 
 ###################    Step 3: Plot the data   ###########################
 
-                plt.plot(range(max_trotter_steps),sz_vals1, label = "N=6")
-                plt.plot(range(max_trotter_steps),sz_vals2, label = "N=10")
+                plt.plot(range(max_trotter_steps),sz_vals1, label = "N=6, FS State")
+                plt.plot(range(max_trotter_steps),sz_vals2, label = "N=10, FS State")
                 plt.xlabel("Time(trotter steps)")
                 plt.legend()
-                plt.ylabel(r"$\langle H\rangle$ (t)")
-                plt.title(f"Hamiltonian exp v/s time for theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
-                plt.savefig(f"scaled_codes/plots/H_compare_plot", dpi =500)
+                plt.ylabel(r"$\langle H\rangle$ (t)/N")
+                plt.title(f"Hamiltonian expectation v/s time for " +  r'$\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
+                plt.savefig(f"scaled_codes/plots/H_compare_plot {i}", dpi =500)
                 plt.close()
 
                 

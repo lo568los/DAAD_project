@@ -331,9 +331,9 @@ def ts_state_circuit(N, num_cl_bits = 0):  #Initialize state with fixed number o
 
 def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits = 0, trotter_barriers = False, save = False):
     if num_cl_bits == 0:
-        qc = ts_state_circuit(N)
+        qc = fermi_state_circuit(N)
     else:
-        qc = ts_state_circuit(N,num_cl_bits)
+        qc = fermi_state_circuit(N,num_cl_bits)
     qc.x(N)
     qc.barrier()
     
@@ -375,7 +375,7 @@ def reduced_dm_met(qc,index,reduced_dm_list):
     Y_values = Y_avg.result().values[0].real
 
     dm = DensityMatrix((1/2)*(np.eye(2) + X_values*np.array([[0,1],[1,0]]) + Y_values*np.array([[0,-1j],[1j,0]]) + Z_values*np.array([[1,0],[0,-1]])))
-    reduced_dm_list.append((dm,index))
+    reduced_dm_list[index] = dm
 
 
 def concurrence(dm_list, conc_list1):
@@ -397,7 +397,7 @@ def entanglement_entropy(dm_list, vne_list1):
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-print(f"Starting the ent code for N = {N} and t = {max_trotter_steps} and TS State....")
+print(f"Starting the ent code for N = {N} and t = {max_trotter_steps}")
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 
 pos_list = list(range(N) ) #list of positions to calculate correlator functions
@@ -407,7 +407,7 @@ sampler = Sampler()  #sampler object to sample the circuits
 
 conc_list1 = []
 vne_list1 = []
-reduced_dm_list = []
+reduced_dm_list = [0]*max_trotter_steps
 
 if theta_k > theta:
     print('Kondo interaction is greater than hopping parameter. Skipping over values')

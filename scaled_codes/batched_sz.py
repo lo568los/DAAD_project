@@ -332,9 +332,9 @@ def kondo_unitary(theta_k,theta_z):
 
 def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits = 0, trotter_barriers = False, save = False):
     if num_cl_bits == 0:
-        qc = ts_state_circuit(N)
+        qc = fermi_state_circuit(N)
     else:
-        qc = ts_state_circuit(N,num_cl_bits)
+        qc = fermi_state_circuit(N,num_cl_bits)
     qc.x(N)
     qc.barrier()
     
@@ -368,14 +368,14 @@ def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits =
 def plot_mag_impurity(qc,index,sz_list1):
     imp_observables = SparsePauliOp('I'*N + 'Z' + 'I'*N)
     job_1 = estimator.run(qc,imp_observables,shots = None)
-    sz_list1.append((job_1.result().values[0],index))
+    sz_list1[index] = job_1.result().values[0]
     #
     # print("Value appended to list",job_1.result().values[0])
 
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-print(f"Sz results for N = {N}, and t = {max_trotter_steps} and TS State")
+print(f"Sz results for N = {N}, and t = {max_trotter_steps}")
 
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 
@@ -384,7 +384,7 @@ pos_list = list(range(N) ) #list of positions to calculate correlator functions
 estimator = Estimator(approximation=True) #estimator object to estimate the expectation values
 sampler = Sampler()  #sampler object to sample the circuits
 
-sz_list1 = []
+sz_list1 = [0]*max_trotter_steps
 
 
 if theta_k > theta:
@@ -455,8 +455,8 @@ else:
             threads[i].join()
         print(f"Batch {n+1} completed")
 
-    sz_list1.sort(key = lambda x: x[1])
-    sz_list1 = [x[0] for x in sz_list1]
+    #sz_list1.sort(key = lambda x: x[1])
+    #sz_list1 = [x[0] for x in sz_list1]
     
     t5 = time.time()
     total3 = t5-t4

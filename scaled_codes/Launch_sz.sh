@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-for Nloop in 6 10
+for Nloop in 10
 do
-    for theta_loop in 0.79
+    for theta_loop in 1.07 0.79
     do
         for thetak_loop in 0.79 0.52
         do

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 N_list = [6]
 theta_list = [1.07]  #pass the true values here
 thetak_list = [0.79]
-max_trotter_steps = 50
+max_trotter_steps = 100
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -30,6 +30,8 @@ def plot_corr_time(t, corr_super): # For corr vs pos
     plt.savefig(f"scaled_codes/plots/Correlator space, N = {N}")
     plt.close()
 
+i = 0
+
 
 for N in N_list:
     for theta in theta_list:
@@ -39,17 +41,17 @@ for N in N_list:
             else:
 
 
-                #data1 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt")
-                #data2 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt")
+                #data1 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz_TS.txt")
+                #data2 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h_TS.txt")
                 #data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = 0.79, theta_k = 0.53_corr.txt")
                 data4 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
                 data5 = np.loadtxt(f"scaled_codes/data/N = 10, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt")
-
+                i+=1
                 #sz_vals = data1[:,1]
                 #h_vals = data2[:,1]
                 conc_vals1 = data4[:,1]
                 conc_vals2 = data5[:,1]
-                #vne_vals = data4[:,2]
+                vne_vals = data4[:,2]
                 #conc_vals = [x.real for x in conc_vals]
                 #vne_vals = [y.real for y in conc_vals]
 
@@ -65,30 +67,26 @@ for N in N_list:
                 """plt.plot(range(max_trotter_steps),sz_vals)
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"$\langle S^z_{imp}(t)\rangle$")
-                plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
-                plt.savefig(f"scaled_codes/plots/Sz plot, N = {N}", dpi =500)
+                plt.title(f"Impurity magnetization v/s time for " + r'TS State, $\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
+                plt.savefig(f"scaled_codes/plots/Sz plot_TS {i}, N = {N}", dpi =500)
                 plt.close()
 
                 plt.plot(range(max_trotter_steps),h_vals)
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"$\langle H \rangle (t)$")
-                plt.title(f"Impurity magnetization v/s time for N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
-                plt.savefig(f"scaled_codes/plots/H_exp plot, N = {N}", dpi =500)
+                plt.title(f"Hamiltonian expectation v/s time for " +  r'TS State, $\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
+                plt.savefig(f"scaled_codes/plots/H_exp plot_TS {i}, N = {N}", dpi =500)
                 plt.close()"""
 
-                plt.plot(range(max_trotter_steps),conc_vals1[:50], label = "N=6")
+                plt.plot(range(max_trotter_steps),conc_vals1, label = "N=6")
                 plt.plot(range(max_trotter_steps),conc_vals2, label = "N=10")
-                #plt.plot(range(max_trotter_steps),vne_vals, label = "Von Neumann")
                 plt.xlabel("Time(trotter steps)")
                 plt.ylabel(r"Entanglement between subsystems")
                 plt.legend()
-                plt.title(f"Entanglement measures between impurity and leads, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}")
-                plt.legend()
-                plt.savefig(f"scaled_codes/plots/Entanglement plot FOR DIFFERENT N", dpi = 500)
+                plt.title(f"Entanglement measures " +  r'FS State, $\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
+                plt.savefig(f"scaled_codes/plots/Entanglement plot_compare {i}", dpi = 500)
                 plt.close()
 
-
-            """"""
 
 
 
