@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
-N = 6
-theta= 1.07  #pass the true values here
+N = 10
+theta= 0.79 #pass the true values here
 theta_k = 0.79
 max_trotter_steps = 100
 
@@ -36,7 +36,16 @@ h_vals = [0]*max_trotter_steps
 
 for i in range(max_trotter_steps):
     data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_h.txt")
-    h_vals[i] = data[:,1][0]
+    #print(data)
+    h_vals[i] = data[1]/N
+
+#data1 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}_h.txt")
+data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}_h.txt")
+
+#h_vals1 = data1[:,1]/N
+h_vals2 = data2[:,1]/6
+
+
         
 
 
@@ -46,11 +55,14 @@ for i in range(max_trotter_steps):
 
               
 
-plt.plot(range(max_trotter_steps),h_vals)
+plt.plot(range(max_trotter_steps),h_vals, label = "N=10, new")
+#plt.plot(range(max_trotter_steps),h_vals1, label = "N=10, old")
+plt.plot(range(max_trotter_steps),h_vals2, label = "N=6")
 plt.xlabel("Time(trotter steps)")
-plt.ylabel(r"$\langle H \rangle (t)$")
+plt.ylabel(r"$\langle H \rangle (t)$/N")
+plt.legend()
 plt.title(f"Hamiltonian expectation v/s time for " +  r'FS State, $\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
-plt.savefig(f"scaled_codes/plots/H_exp plot_FS , N = {N}", dpi =500)
+plt.savefig(f"scaled_codes/plots/H_exp plot_FS_new2 , N = {N}", dpi =500)
 plt.close()
 
                 

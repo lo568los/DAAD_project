@@ -15,7 +15,7 @@ export OMP_NUM_THREADS=1
 N=10
 theta=0.79
 theta_k=0.52
-max_trotter_steps=100
+max_trotter_steps=89
 
 
 python3 test_h.py $N $theta $theta_k $max_trotter_steps
