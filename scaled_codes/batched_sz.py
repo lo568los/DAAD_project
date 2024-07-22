@@ -269,6 +269,23 @@ def add_fsim_full(qc,angles):
         qc.unitary(fsim2,[i,i+1],label = r'fsim$(2\theta,\phi)$')
 
 
+def ts_state_circuit(N, num_cl_bits = 0):  #Initialize state with fixed number of paricles in up or down chain
+    qc = QuantumCircuit(2*N+1,num_cl_bits)
+    str1 = ''
+    str2 = ''
+    for i in range(N):
+        if i%2 == 0:
+            str1 += '1'
+            str2 += '0'
+        else:
+            str1 += '0'
+            str2 += '1'
+    state = (Statevector.from_label(str1) + Statevector.from_label(str2))/np.sqrt(2)
+    qc.initialize(state,range(N))
+    qc.initialize(state,range(N+1,2*N+1))
+    return qc
+
+
 
 
     
@@ -351,7 +368,7 @@ def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits =
 def plot_mag_impurity(qc,index,sz_list1):
     imp_observables = SparsePauliOp('I'*N + 'Z' + 'I'*N)
     job_1 = estimator.run(qc,imp_observables,shots = None)
-    sz_list1.append((job_1.result().values[0],index))
+    sz_list1[index] = job_1.result().values[0]
     #
     # print("Value appended to list",job_1.result().values[0])
 
@@ -367,7 +384,7 @@ pos_list = list(range(N) ) #list of positions to calculate correlator functions
 estimator = Estimator(approximation=True) #estimator object to estimate the expectation values
 sampler = Sampler()  #sampler object to sample the circuits
 
-sz_list1 = []
+sz_list1 = [0]*max_trotter_steps
 
 
 if theta_k > theta:
@@ -419,7 +436,7 @@ else:
     
     print("Starting to calculate expectation values in a parallel fashion....")
     t4 = time.time()
-    num_threads = 5
+    num_threads = max_trotter_steps
     threads = [None]*num_threads
 
     batch_size = max_trotter_steps//num_threads
@@ -438,8 +455,8 @@ else:
             threads[i].join()
         print(f"Batch {n+1} completed")
 
-    sz_list1.sort(key = lambda x: x[1])
-    sz_list1 = [x[0] for x in sz_list1]
+    #sz_list1.sort(key = lambda x: x[1])
+    #sz_list1 = [x[0] for x in sz_list1]
     
     t5 = time.time()
     total3 = t5-t4

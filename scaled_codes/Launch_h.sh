@@ -2,11 +2,11 @@
 
 for Nloop in 10
 do
-    for theta_loop in 1.07
+    for theta_loop in 0.79
     do
-        for thetak_loop in 0.79
+        for thetak_loop in 0.79 0.52
         do
-            for steps_loop in 100
+            for steps_loop in 84 85 86 87 88 89
             do
 
                 sed -i "s/N=.*/N=${Nloop}/g" SubmitJob_h.ll

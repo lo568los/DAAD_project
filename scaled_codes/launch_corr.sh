@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-for Nloop in 10
+for Nloop in 6
 do
-    for theta_loop in 1.07
+    for theta_loop in 0.79
     do
-        for thetak_loop in 0.79
+        for thetak_loop in 0.79 0.52
         do
-            for steps_loop in 0 25 50
+            for steps_loop in 10 20 30 40 50 60 70 80 90 100
             do
 
                 sed -i "s/N=.*/N=${Nloop}/g" SubmitJob_corr.ll
