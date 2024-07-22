@@ -403,15 +403,40 @@ if theta_k > theta:
 else:
     print('Creating super list of circuits....')
 
+   
+    theta_z = -theta_k
+    qc_list = [0]*max_trotter_steps
+    qc_list2 = [0]*max_trotter_steps
+
     t0 = time.time()
     theta_z = -theta_k
-    qc_list = []
-    #qc_list_2 = []
-    for t in range(max_trotter_steps):
-        qc = circuit_3(N, t, theta,theta_k,theta_z,num_cl_bits = len(measured_bits), trotter_barriers = True, save = True)
-        qc.measure(measured_bits,list(range(len(measured_bits))))
-        qc_list.append(qc)
-    #super_qc_list.append((qc_list,theta,theta_k))
+    
+    qc_list2[0] = circuit_3(N, 0, theta,theta_k,theta_z)
+    qc_list[0] = qc_list2[0].copy()
+    c = num_qubits//2
+    for t in range(1,max_trotter_steps):
+        #print("Value of t:", t)
+        qc = qc_list2[t-1].copy()
+        if t == 1:
+            add_fsim_half(qc,theta)
+            qc.unitary(kondo_unitary(theta_k,theta_z),[c,c+1,c-1],label=r'$U_{k}(\theta_k,\theta_z)$')
+        else:
+            add_fsim_full(qc,theta)
+            qc.unitary(kondo_unitary(theta_k,theta_z),[c,c+1,c-1],label=r'$U_{k}(\theta_k,\theta_z)$')
+        qc.barrier()
+
+                
+                #qc.measure(measured_bits,list(range(len(measured_bits))))
+
+            
+        #print("QC DEpth for list2:",qc.depth())   
+        qc_list2[t] = qc.copy()
+        #print(qc_list2[t].depth())
+        add_fsim_inv_half(qc,theta)
+        #print("QC DEpth for list1:",qc.depth())   
+        qc_list[t] = qc.copy()
+        #print(qc_list[t].depth())
+        del qc
 
     t1 = time.time()
 
