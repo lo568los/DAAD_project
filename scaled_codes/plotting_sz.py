@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
-N = 6
-theta= 1.07  #pass the true values here
+N = 10
+theta= 0.79  #pass the true values here
 theta_k = 0.79
 max_trotter_steps = 100
 
@@ -33,10 +33,16 @@ def plot_corr_time(t, corr_super): # For corr vs pos
 #i = 0
 
 sz_vals = [0]*max_trotter_steps
+sz_vals2 = [0]*max_trotter_steps
 
 for i in range(max_trotter_steps):
     data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
-    sz_vals[i] = data[:,1][0]
+    sz_vals[i] = data[1]
+
+for i in range(max_trotter_steps):
+    data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
+    sz_vals2[i] = data2[1]
+
         
 
 
@@ -46,11 +52,13 @@ for i in range(max_trotter_steps):
 
               
 
-plt.plot(range(max_trotter_steps),sz_vals)
+plt.plot(range(max_trotter_steps),sz_vals, label = "N=10,new")
+plt.plot(range(max_trotter_steps),sz_vals2, label = "N=6,new")
 plt.xlabel("Time(trotter steps)")
 plt.ylabel(r"$\langle S^z_{imp} \rangle (t)$")
+plt.legend()
 plt.title(f"Impurity Magnetization v/s time for " +  r'FS State, $\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
-plt.savefig(f"scaled_codes/plots/Sz plot_FS , N = {N}", dpi =500)
+plt.savefig(f"scaled_codes/plots/Sz plot_FS_new4 ", dpi =500)
 plt.close()
 
                 

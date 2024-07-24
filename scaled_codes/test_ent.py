@@ -370,9 +370,31 @@ def reduced_dm_met(qc):
     X_avg = estimator.run(qc,X_imp_observables,shots = None)
     Y_avg = estimator.run(qc,Y_imp_observables,shots = None)
 
+   
+
     Z_values = Z_avg.result().values[0].real
     X_values = X_avg.result().values[0].real
     Y_values = Y_avg.result().values[0].real
+
+    print("Z_avg = ",Z_avg.result().values[0])
+    print("X_avg = ",X_avg.result().values[0])
+    print("Y_avg = ",Y_avg.result().values[0])
+
+    m_arr = np.array([X_values,Y_values,Z_values])
+    m_perp_sq = X_values**2 + Y_values**2
+    mz_sq = Z_values**2
+    print("m_perp squared = ",m_perp_sq)
+    print("mz squared = ",mz_sq)
+    m_norm = np.linalg.norm(m_arr)
+
+    conc_an = np.sqrt(1-m_norm**2)
+    vne_an = -np.log(conc_an) - 0.5*m_norm*np.log((1+m_norm)/(1-m_norm))
+
+    print("Analytical concurrence = ", conc_an )
+    print("Analytical von-neumann,", vne_an)
+
+    print("Value of 1+sz = ", 1 + Z_values)
+
 
     dm = DensityMatrix((1/2)*(np.eye(2) + X_values*np.array([[0,1],[1,0]]) + Y_values*np.array([[0,-1j],[1j,0]]) + Z_values*np.array([[1,0],[0,-1]])))
     #reduced_dm_list[index] = dm
@@ -430,6 +452,8 @@ else:
     concurrence(dm,0,conc_list1)
     entanglement_entropy(dm,0,vne_list1)
     t3 = time.time()
+    print("Numerical concurrence =", conc_list1[0])
+    print("Numerical von-neumann =", vne_list1[0])
     total2 = t3-t2
 
     
@@ -464,7 +488,7 @@ else:
     #data_h = np.column_stack((time_list,h_list1[0]))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
     data_ent = np.column_stack((time_list,conc_list1, vne_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_ent.txt",data_ent,header = header_ent)
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_ent.txt",data_ent,header = header_ent)
 
     #t7 = time.time()
     #total4 = t7-t6
