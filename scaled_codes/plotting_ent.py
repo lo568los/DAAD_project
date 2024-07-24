@@ -8,9 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
-N = 10
-theta= 1.07  #pass the true values here
-theta_k = 0.79
+N = 6
+theta= 0.79 #pass the true values here
+theta_k = 0.52
 max_trotter_steps = 100
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
@@ -34,11 +34,27 @@ def plot_corr_time(t, corr_super): # For corr vs pos
 
 conc_vals = [0]*max_trotter_steps
 vne_vals = [0]*max_trotter_steps
+ratio_vals = [0]*max_trotter_steps
+
+ratio_vals2 = [0]*max_trotter_steps
+
+conc_vals2 = [0]*max_trotter_steps
+vne_vals2 = [0]*max_trotter_steps
 
 for i in range(max_trotter_steps):
     data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_ent.txt")
-    conc_vals[i] = data[:,1][0]
-    vne_vals[i] = data[:,2][0]
+    conc_vals[i] = data[1]
+    vne_vals[i] = data[2]
+    ratio_vals[i] = vne_vals[i]/conc_vals[i]
+
+for i in range(max_trotter_steps):
+    data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}, t = {i}_ent.txt")
+    conc_vals2[i] = data2[1]
+    vne_vals2[i] = data2[2]
+
+for i in range(max_trotter_steps):
+    data3 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
+    ratio_vals2[i] = (1+data3[1])/conc_vals[i]
 
 
 
@@ -47,12 +63,17 @@ for i in range(max_trotter_steps):
 
               
 
-plt.plot(range(max_trotter_steps),conc_vals, label = "Concurrence")
-plt.plot(range(max_trotter_steps),vne_vals, label = "Von Neumann")
+plt.plot(range(max_trotter_steps),conc_vals,"r-", label = "Concurrence, N = 10")
+plt.plot(range(max_trotter_steps),vne_vals,"b--", label = "Von Neumann, N = 10")
+plt.plot(range(max_trotter_steps),ratio_vals2,"r.", label = "Ratio of 1+Sz and Conc., N = 10")
+
+#plt.plot(range(max_trotter_steps),conc_vals2,"b-", label = "Concurrence, N = 6")
+#plt.plot(range(max_trotter_steps),vne_vals2,"b--", label = "Von Neumann, N = 6")
 plt.xlabel("Time(trotter steps)")
 plt.ylabel(r"Entanglement between subsystems")
+plt.legend()
 plt.title(f"Entanglement measure v/s time for " +  r'FS State, $\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
-plt.savefig(f"scaled_codes/plots/Ent plot_FS , N = {N}", dpi =500)
+plt.savefig(f"scaled_codes/plots/Ent plot_FS_ratio3", dpi =500)
 plt.close()
 
                 

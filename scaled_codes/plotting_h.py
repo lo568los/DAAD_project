@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
 N = 10
-theta= 0.79 #pass the true values here
+theta= 1.07 #pass the true values here
 theta_k = 0.52
 max_trotter_steps = 100
 
@@ -62,7 +62,7 @@ plt.xlabel("Time(trotter steps)")
 plt.ylabel(r"$\langle H \rangle (t)$/N")
 plt.legend()
 plt.title(f"Hamiltonian expectation v/s time for " +  r'FS State, $\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
-plt.savefig(f"scaled_codes/plots/H_exp plot_FS_new3 , N = {N}", dpi =500)
+plt.savefig(f"scaled_codes/plots/H_exp plot_FS_new4 , N = {N}", dpi =500)
 plt.close()
 
                 
