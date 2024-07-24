@@ -452,6 +452,8 @@ else:
     concurrence(dm,0,conc_list1)
     entanglement_entropy(dm,0,vne_list1)
     t3 = time.time()
+    print("Numerical concurrence =", conc_list1[0])
+    print("Numerical von-neumann =", vne_list1[0])
     total2 = t3-t2
 
     
