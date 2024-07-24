@@ -488,7 +488,7 @@ else:
     #data_h = np.column_stack((time_list,h_list1[0]))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_h.txt",data_h,header = header_h)
     data_ent = np.column_stack((time_list,conc_list1, vne_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_ent.txt",data_ent,header = header_ent)
+    #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_ent.txt",data_ent,header = header_ent)
 
     #t7 = time.time()
     #total4 = t7-t6
