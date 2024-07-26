@@ -6,16 +6,16 @@
 #@ error  = Errors/$(jobid).error_file      
 #@ tasks_per_node = 1
 #@ environment = COPY_ALL                   
-#@ class = 128core_2023
+#@ class = 32core
 #@ notification = complete
 #@ notify_user = e.koenig@fkf.mpg.de
 #@ queue 
 
 export OMP_NUM_THREADS=1
-N=6
-theta=1.07
-theta_k=0.52
-max_trotter_steps=400
+N=10
+theta=0.79
+theta_k=0.79
+max_trotter_steps=200
 
 
 python3 test_sz.py $N $theta $theta_k $max_trotter_steps
