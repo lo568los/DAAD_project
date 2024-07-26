@@ -389,7 +389,7 @@ def plot_mag_impurity(qc,index,sz_list1):
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-print(f"Starting the hexp code for N = {N} and t = {t}")
+print(f"Starting the sz code for N = {N} and t = {t}")
 
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 

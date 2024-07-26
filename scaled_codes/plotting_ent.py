@@ -63,9 +63,9 @@ for i in range(max_trotter_steps):
 
               
 
-plt.plot(range(max_trotter_steps),conc_vals,"r-", label = "Concurrence, N = 10")
-plt.plot(range(max_trotter_steps),vne_vals,"b--", label = "Von Neumann, N = 10")
-plt.plot(range(max_trotter_steps),ratio_vals2,"r.", label = "Ratio of 1+Sz and Conc., N = 10")
+plt.plot(range(max_trotter_steps),conc_vals,"r-", label = "Concurrence, N = 6")
+plt.plot(range(max_trotter_steps),vne_vals,"b--", label = "Von Neumann, N = 6")
+plt.plot(range(max_trotter_steps),ratio_vals2,"r.", label = "Ratio of 1+Sz and Conc., N = 6")
 
 #plt.plot(range(max_trotter_steps),conc_vals2,"b-", label = "Concurrence, N = 6")
 #plt.plot(range(max_trotter_steps),vne_vals2,"b--", label = "Von Neumann, N = 6")
