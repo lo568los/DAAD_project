@@ -376,7 +376,7 @@ def plot_correlator(qc,pos, corr_list):
     exp_vals = correlator_expectation2(pos,qc)
     exp_vals_red = reduced_corr(pos,qc)
     final_vals = exp_vals - exp_vals_red
-    corr_list.append((final_vals.real,pos))
+    corr_list[pos - 1] = final_vals
     #return final_vals
 #print("Concurrence calculated successfully!")
 
@@ -392,7 +392,7 @@ pos_list = list(range(1,N+1)) #list of positions to calculate correlator functio
 estimator = Estimator(approximation=True) #estimator object to estimate the expectation values
 sampler = Sampler()  #sampler object to sample the circuits
 
-corr_list = []  #list to store correlator functions
+corr_list = [0]*len(pos_list)  #list to store correlator functions
   #list to store final values of correlator functions
 
 if theta_k > theta:
@@ -429,8 +429,6 @@ else:
     for pos in pos_list:
         threads[pos-1].join()
 
-    corr_list.sort(key = lambda x: x[1])
-    corr_list = [x[0] for x in corr_list]
 
     t3 = time.time()
 
