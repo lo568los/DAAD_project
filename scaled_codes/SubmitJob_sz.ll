@@ -12,7 +12,7 @@
 #@ queue 
 
 export OMP_NUM_THREADS=1
-N=10
+N=6
 theta=0.79
 theta_k=0.79
 max_trotter_steps=200
