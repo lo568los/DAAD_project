@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
-N = 10
+N = 6
 theta= 1.07  #pass the true values here
-theta_k = 0.79
-max_trotter_steps = 200
+theta_k = 0.52
+max_trotter_steps = 1000
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -64,7 +64,7 @@ for i in range(max_trotter_steps):
               
 
 
-plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=10,FS")
+plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,FS")
 """plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,FS")
 plt.plot(range(max_trotter_steps),sz_vals3,"--",color='orange', label = "N=8,TS")
 plt.plot(range(max_trotter_steps),sz_vals,"g--", label = "N=10,TS")
@@ -73,7 +73,7 @@ plt.xlabel("Time(trotter steps)")
 plt.ylabel(r"$\langle S^z_{imp} \rangle (t)$")
 plt.legend()
 plt.title(f"Impurity Magnetization v/s time for " +  r'$\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
-plt.savefig(f"scaled_codes/plots/Sz plot_FS_rec4 ", dpi =500)
+plt.savefig(f"scaled_codes/plots/Sz plot_FS_rec5 ", dpi =500)
 plt.close()
 
                 
