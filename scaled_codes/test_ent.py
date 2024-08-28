@@ -386,17 +386,21 @@ def reduced_dm_met(qc):
     print("m_perp squared = ",m_perp_sq)
     print("mz squared = ",mz_sq)
     m_norm = np.linalg.norm(m_arr)
+    #print("Analytical eigenvalues = ",[0.5*(1 - m_norm), 0.5*(1 + m_norm)])
 
     conc_an = np.sqrt(1-m_norm**2)
-    vne_an = -np.log(conc_an) - 0.5*m_norm*np.log((1+m_norm)/(1-m_norm))
+    vne_an = -np.log(conc_an*0.5) - 0.5*m_norm*np.log((1+m_norm)/(1-m_norm))
 
     print("Analytical concurrence = ", conc_an )
     print("Analytical von-neumann,", vne_an)
 
     print("Value of 1+sz = ", 1 + Z_values)
+    print("producr of conc and vn = ",conc_an*vne_an)
+    print("Ratio = ", (1 + Z_values)/(conc_an*vne_an))
 
 
     dm = DensityMatrix((1/2)*(np.eye(2) + X_values*np.array([[0,1],[1,0]]) + Y_values*np.array([[0,-1j],[1j,0]]) + Z_values*np.array([[1,0],[0,-1]])))
+    #print("Density matrix 1 = ",dm)
     #reduced_dm_list[index] = dm
     return dm
 
@@ -410,7 +414,9 @@ def concurrence(dm,index, conc_list1):
     conc_list1[index] = (np.sqrt(2*(1-c))).real
 #print("Concurrence calculated successfully!")
 def entanglement_entropy(dm,index, vne_list1):
+    #print("Density matrix 2 = ",dm)
     eigvals = la.eigvalsh(dm)
+    #print("Numerical eigenvalues = ",eigvals)
     vne = 0
     for eigval in eigvals:
         if eigval > 0:
@@ -454,6 +460,7 @@ else:
     t3 = time.time()
     print("Numerical concurrence =", conc_list1[0])
     print("Numerical von-neumann =", vne_list1[0])
+    #print("producr of conc and vn numerically = ",conc_list1[0]*vne_list1[0])
     total2 = t3-t2
 
     

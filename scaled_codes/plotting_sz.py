@@ -38,23 +38,23 @@ sz_vals3 = [0]*max_trotter_steps
 sz_vals4 = [0]*max_trotter_steps
 sz_vals5 = [0]*max_trotter_steps
 
-"""for i in range(max_trotter_steps):
-    data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
-    sz_vals[i] = data[1]
+for i in range(max_trotter_steps):
+    #data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
+    #sz_vals[i] = data[1]
     data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
     sz_vals4[i] = data[1]
 
 
 
-for i in range(max_trotter_steps):
+"""for i in range(max_trotter_steps):
     data3 = np.loadtxt(f"scaled_codes/data/N = 8, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
-    sz_vals3[i] = data3[1]"""
+    sz_vals3[i] = data3[1]
 
 for i in range(max_trotter_steps):
     data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
     sz_vals2[i] = data2[1]  
     #data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
-    #sz_vals5[i] = data2[1]     
+    #sz_vals5[i] = data2[1]  """  
 
 
 
@@ -64,7 +64,7 @@ for i in range(max_trotter_steps):
               
 
 
-plt.plot(range(max_trotter_steps),sz_vals2, "b-", label = "N=6,FS")
+plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,FS")
 """plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,FS")
 plt.plot(range(max_trotter_steps),sz_vals3,"--",color='orange', label = "N=8,TS")
 plt.plot(range(max_trotter_steps),sz_vals,"g--", label = "N=10,TS")
