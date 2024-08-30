@@ -14,7 +14,7 @@
 export OMP_NUM_THREADS=1
 N=6
 theta=1.07
-theta_k=0.52
+theta_k=0.42
 max_trotter_steps=1000
 
 
