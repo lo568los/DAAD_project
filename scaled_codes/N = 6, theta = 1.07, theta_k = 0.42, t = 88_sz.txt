@@ -1,0 +1,3 @@
+# N = 6, theta = 1.07, theta_k = 0.42, t = 88
+#  TIME || Sz expectation value
+8.800000000000000000e+01 -6.176299788817226633e-01

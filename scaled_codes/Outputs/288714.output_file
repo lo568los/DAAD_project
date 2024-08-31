@@ -1,0 +1,6 @@
+Starting the sz code for N = 6 and t = 185
+Creating super list of circuits....
+Super list genereted successfully! Time taken: 0.31
+Starting to calculate expectation values in a parallel fashion....
+Multi-threading completed successfully! Time taken: 373.18
+Results saved successfully!
