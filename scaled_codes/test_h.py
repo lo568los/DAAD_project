@@ -399,7 +399,7 @@ else:
     print('Creating super list of circuits....')
 
     t0 = time.time()
-    theta_z = -theta_k
+    theta_z = theta_k
     qc = circuit_3(N,t,theta,theta_k,theta_z)
 
     t1 = time.time()

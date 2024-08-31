@@ -6,7 +6,7 @@
 #@ error  = Errors/$(jobid).error_file      
 #@ tasks_per_node = 1
 #@ environment = COPY_ALL                   
-#@ class = 128core_new
+#@ class = 32core
 #@ notification = complete
 #@ notify_user = e.koenig@fkf.mpg.de
 #@ queue 

@@ -404,7 +404,7 @@ else:
     print('Creating super list of circuits....')
 
     t0 = time.time()
-    theta_z = -theta_k
+    theta_z = theta_k  #should it be negative? Test it out with positive values too
     qc = circuit_3(N,t,theta,theta_k,theta_z)
 
     t1 = time.time()
@@ -443,7 +443,7 @@ else:
     #data_sz = np.column_stack((time_list,sz_list1))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
     data_h = np.column_stack((time_list,sz_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_sz.txt",data_h,header = header_h)
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_sz_pos.txt",data_h,header = header_h)
     """data_ent = np.column_stack((time_list,conc_list1,vn_list1))
     np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)"""
 
