@@ -1,0 +1,6 @@
+Starting the hexp code for N = 6 and t = 500
+Creating super list of circuits....
+Super list genereted successfully! Time taken: 0.84
+Starting to calculate expectation values in a parallel fashion....
+Multi-threading completed successfully! Time taken: 1004.44
+Results saved successfully!
