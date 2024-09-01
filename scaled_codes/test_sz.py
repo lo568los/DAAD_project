@@ -389,7 +389,7 @@ def plot_mag_impurity(qc,index,sz_list1):
 
 
 ###################    Step 4: The main code which generates <S^z-imp>, <H>(t) and entanglement measures w.r.t time and space    ###########################
-print(f"Starting the sz code for N = {N} and t = {t}")
+print(f"Starting the sz code for N = {N} and t = {t} anisotropic")
 
 measured_bits =list(range(2*N + 1))  #list of qubits to measure
 
@@ -404,7 +404,7 @@ else:
     print('Creating super list of circuits....')
 
     t0 = time.time()
-    theta_z = theta_k  #should it be negative? Test it out with positive values too
+    theta_z = 0.5*np.sqrt(2)*(np.sqrt(2) - 1)*np.pi*np.sin(theta)  #should it be negative? Test it out with positive values too
     qc = circuit_3(N,t,theta,theta_k,theta_z)
 
     t1 = time.time()
@@ -443,7 +443,7 @@ else:
     #data_sz = np.column_stack((time_list,sz_list1))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
     data_h = np.column_stack((time_list,sz_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_sz_pos.txt",data_h,header = header_h)
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_sz_tol.txt",data_h,header = header_h)
     """data_ent = np.column_stack((time_list,conc_list1,vn_list1))
     np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)"""
 
