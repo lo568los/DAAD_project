@@ -12,10 +12,10 @@
 #@ queue 
 
 export OMP_NUM_THREADS=1
-N=6
+N=10
 theta=0.79
 theta_k=0.52
-max_trotter_steps=1000
+max_trotter_steps=400
 
 
 python3 test_sz.py $N $theta $theta_k $max_trotter_steps

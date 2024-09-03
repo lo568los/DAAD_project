@@ -1,0 +1,6 @@
+Starting the sz code for N = 6 and t = 229 anisotropic
+Creating super list of circuits....
+Super list genereted successfully! Time taken: 0.44
+Starting to calculate expectation values in a parallel fashion....
+Multi-threading completed successfully! Time taken: 456.9
+Results saved successfully!

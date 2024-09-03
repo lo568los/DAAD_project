@@ -1,0 +1,18 @@
+Starting the ent code for N = 6 and t = 312
+Creating super list of circuits....
+Super list genereted successfully! Time taken: 0.67
+Starting to entanglement values in a parallel fashion....
+Z_avg =  -0.5175258939290179
+X_avg =  0.0
+Y_avg =  0.0
+m_perp squared =  0.0
+mz squared =  0.26783305088702913
+Analytical concurrence =  0.8556675459037645
+Analytical von-neumann, 0.5525016637886411
+Value of 1+sz =  0.48247410607098207
+producr of conc and vn =  0.4727577427617733
+Ratio =  1.0205525207317545
+Numerical concurrence = 0.8556675459037644
+Numerical von-neumann = 0.5525016637886411
+Concurrence calculated successfully! Time taken: 2327.29
+Results saved successfully!
