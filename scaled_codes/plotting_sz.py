@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
-N = 10
-theta= 1.07  #pass the true values here
-theta_k = 0.52
-max_trotter_steps = 1000
+N = 6
+theta= 0.79  #pass the true values here
+theta_k = 0.79
+max_trotter_steps = 400
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -41,8 +41,10 @@ sz_vals5 = [0]*max_trotter_steps
 for i in range(max_trotter_steps):
     #data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
     #sz_vals[i] = data[1]
-    data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
+    data = np.loadtxt(f"scaled_codes/data2/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_tol.txt")
     sz_vals4[i] = data[1]
+    data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
+    sz_vals3[i] = data[1]
 
 
 
@@ -64,7 +66,8 @@ for i in range(max_trotter_steps):
               
 
 
-plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,FS")
+plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,Anisotropic")
+plt.plot(range(max_trotter_steps),sz_vals3, "r-", label = "N=6,Isotropic")
 """plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,FS")
 plt.plot(range(max_trotter_steps),sz_vals3,"--",color='orange', label = "N=8,TS")
 plt.plot(range(max_trotter_steps),sz_vals,"g--", label = "N=10,TS")
@@ -73,7 +76,7 @@ plt.xlabel("Time(trotter steps)")
 plt.ylabel(r"$\langle S^z_{imp} \rangle (t)$")
 plt.legend()
 plt.title(f"Impurity Magnetization v/s time for " +  r'$\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
-plt.savefig(f"scaled_codes/plots/Sz plot_FS_rec5 ", dpi =500)
+plt.savefig(f"scaled_codes/plots2/Sz plot_FS_comp3 ", dpi =500)
 plt.close()
 
                 
