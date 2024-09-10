@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
 N = 10
-theta= 1.07 #pass the true values here
-theta_k = 0.52
+theta= 0.79 #pass the true values here
+theta_k = 0.79
 max_trotter_steps = 100
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
@@ -55,14 +55,15 @@ h_vals2 = data2[:,1]/6
 
               
 
-plt.plot(range(max_trotter_steps),h_vals, label = "N=10, new")
+plt.plot(range(max_trotter_steps),h_vals,"b-", label = "N=10, FS Isotropic")
 #plt.plot(range(max_trotter_steps),h_vals1, label = "N=10, old")
-plt.plot(range(max_trotter_steps),h_vals2, label = "N=6")
+plt.plot(range(max_trotter_steps),h_vals2,"r-", label = "N=6, FS Isotropic")
 plt.xlabel("Time(trotter steps)")
 plt.ylabel(r"$\langle H \rangle (t)$/N")
 plt.legend()
-plt.title(f"Hamiltonian expectation v/s time for " +  r'FS State, $\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
-plt.savefig(f"scaled_codes/plots/H_exp plot_FS_new4 , N = {N}", dpi =500)
+plt.grid()
+plt.title(f"Hamiltonian expectation v/s time for " +  r'$\theta = \pi/4$ and'  + r' $\theta_k = \pi/4$' )
+plt.savefig(f"scaled_codes/plots/H_exp plot_FS_fin1", dpi =500)
 plt.close()
 
                 

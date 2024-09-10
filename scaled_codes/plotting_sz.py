@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
-N = 6
-theta= 0.79  #pass the true values here
+N = 10
+theta= 1.07  #pass the true values here
 theta_k = 0.79
-max_trotter_steps = 400
+max_trotter_steps = 200
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -50,13 +50,12 @@ for i in range(max_trotter_steps):
 
 """for i in range(max_trotter_steps):
     data3 = np.loadtxt(f"scaled_codes/data/N = 8, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
-    sz_vals3[i] = data3[1]
-
+    sz_vals3[i] = data3[1]"""
 for i in range(max_trotter_steps):
-    data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
+    data2 = np.loadtxt(f"scaled_codes/data2/N = 6, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_tol.txt")
     sz_vals2[i] = data2[1]  
-    #data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
-    #sz_vals5[i] = data2[1]  """  
+    data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}, t = {i}_sz.txt")
+    sz_vals5[i] = data2[1]    
 
 
 
@@ -66,17 +65,20 @@ for i in range(max_trotter_steps):
               
 
 
-plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,Anisotropic")
-plt.plot(range(max_trotter_steps),sz_vals3, "r-", label = "N=6,Isotropic")
+plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=10, FS Anisotropic")
+plt.plot(range(max_trotter_steps),sz_vals3, "c-", label = "N=10, FS Isotropic")
+plt.plot(range(max_trotter_steps),sz_vals2, "r-", label = "N=6, FS Anisotropic")
+plt.plot(range(max_trotter_steps),sz_vals5, "g-", label = "N=6, FS Isotropic")
 """plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,FS")
 plt.plot(range(max_trotter_steps),sz_vals3,"--",color='orange', label = "N=8,TS")
 plt.plot(range(max_trotter_steps),sz_vals,"g--", label = "N=10,TS")
 plt.plot(range(max_trotter_steps),sz_vals5,"g-", label = "N=10,FS")"""
 plt.xlabel("Time(trotter steps)")
 plt.ylabel(r"$\langle S^z_{imp} \rangle (t)$")
+plt.grid()
 plt.legend()
-plt.title(f"Impurity Magnetization v/s time for " +  r'$\theta =$' +  f"{round(theta,2)}, " + r' $\theta_k =$' + f"{round(theta_k,2)}")
-plt.savefig(f"scaled_codes/plots2/Sz plot_FS_comp3 ", dpi =500)
+plt.title(f"Impurity Magnetization v/s time for " +  r'$\theta = \pi/3$ and ' + r'$\theta_k = \pi/4$')
+plt.savefig(f"scaled_codes/plots2/Sz plot_FS_compiso", dpi =500)
 plt.close()
 
                 
