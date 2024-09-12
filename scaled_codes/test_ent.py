@@ -200,11 +200,14 @@ def fermi_state(num_qubits): #of the form num_qubits = 2*odd number. This functi
     return fermi_state
 
 def fermi_state_circuit(N,num_cl_bits = 0):  #Initialize circuit with FS with both spin chains having it's own FS
+    list1 = list(range(2*N+1))
+    list1.pop(N)
     qc = QuantumCircuit(num_qubits,num_cl_bits)
     fermi_state_up = fermi_state(N)
     fermi_state_down = fermi_state(N)
-    qc.initialize(fermi_state_up,range(N))
+    qc.initialize(fermi_state_up,reversed(range(N)))
     qc.initialize(fermi_state_down,range(N+1,2*N+1))
+    qc.x(list1)
     return qc
 
 def fsim(theta,phi,beta):  #Block for free fermions
