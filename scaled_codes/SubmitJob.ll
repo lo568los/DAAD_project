@@ -13,8 +13,8 @@
 
 export OMP_NUM_THREADS=8
 N=6
-theta=1.07
-theta_k=0.79
+theta=0.79
+theta_k=0.52
 
 
 python3 ed.py $N $theta $theta_k 
