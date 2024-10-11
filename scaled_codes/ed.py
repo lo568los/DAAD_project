@@ -349,7 +349,7 @@ eigvals = eigvals.real
 #eigvecs = eigvecs.real #May be actually different due to phase differences
 
 ###Testing the eigenvectors
-"""def coeffs_calc(sv,eigvecs):
+def coeffs_calc(sv,eigvecs):
     coeffs = []
     for i in range(len(eigvecs)):
         coeffs.append(np.dot(np.conjugate(eigvecs[:,i]),sv))
@@ -361,25 +361,6 @@ def time_evolved_state(eigvals,eigvecs,coeffs,t):
         time_state += coeffs[i]*np.exp(-1j*eigvals[i]*t)*eigvecs[:,i]
     return time_state
 
-def sz_operator(N):
-    eye1 = np.eye(2**N)
-    z_op = np.array([[1,0],[0,-1]])
-    eye2 = np.eye(2**N)
-
-    z_imp = np.kron(eye1,z_op)
-    z_imp = np.kron(z_imp,eye2)
-
-    return z_imp
-
-def plot_Sz(N,eigvals,eigvecs,coeffs,time_steps):
-    sz_op = sz_operator(N)
-    sz_exp = [0]*time_steps
-    for t in range(time_steps):
-        time_state = time_evolved_state(eigvals,eigvecs,coeffs,t)
-        sz_exp[t] = np.dot(np.conjugate(time_state),np.dot(sz_op,time_state))
-    
-    return sz_exp
-
 coeffs = coeffs_calc(sv_np,eigvecs)
 sv_test = 0
 
@@ -388,13 +369,13 @@ for i in range(len(coeffs)):
 
 print("Printing the tested vals",np.linalg.norm(sv_test - sv_np))
 
-sz_vals = []
+#sz_vals = []
 
-sz_exp = plot_Sz(N,eigvals,eigvecs,coeffs,100)
+#sz_exp = plot_Sz(N,eigvals,eigvecs,coeffs,100)
 
-data = np.loadtxt(f"N = 2, theta = {theta}, theta_k = {theta_k}, t = 100_sz_tol.txt")[:,1]
+#data = np.loadtxt(f"N = 2, theta = {theta}, theta_k = {theta_k}, t = 100_sz_tol.txt")[:,1]
 
-plt.plot(range(100),data,"ro-",label = "Theoretical")
+"""plt.plot(range(100),data,"ro-",label = "Theoretical")
 plt.plot(range(100),data,"b-",label = "Numerical")
 plt.xlabel('Time (trotter steps)')
 plt.ylabel(r"$\langle S_z \rangle$")
@@ -405,8 +386,8 @@ plt.show()"""
 
 ### Now we save the data
 
-data_eig = np.column_stack((eigvals,eigvecs.T.real))
+data_eig = np.column_stack((eigvals,eigvecs))
 string = f"N = {N}, theta = {theta}, theta_k = {theta_k}"
 header_eig = string + "\n EIGVALS|| EIGVECS"
-np.savetxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}, eigvecs_tol.txt",data_eig,header=header_eig)
+np.savetxt(f"N={N},theta={theta},theta_k={theta_k},eigvecs_tol.txt",data_eig.view(float),header=header_eig)
 
