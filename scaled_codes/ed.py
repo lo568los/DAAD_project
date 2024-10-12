@@ -16,7 +16,7 @@ from qiskit.quantum_info import partial_trace # To check later whether our deriv
 from qiskit.quantum_info import DensityMatrix
 from qiskit.quantum_info import purity
 from scipy import linalg as la
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 from qiskit_aer.primitives import Sampler
@@ -361,6 +361,18 @@ def time_evolved_state(eigvals,eigvecs,coeffs,t):
         time_state += coeffs[i]*np.exp(-1j*eigvals[i]*t)*eigvecs[:,i]
     return time_state
 
+def sz_operator(N):
+    eye1 = np.eye(2**N)
+    z_op = np.array([[1,0],[0,-1]])
+    eye2 = np.eye(2**N)
+
+    z_imp = np.kron(eye1,z_op)
+    z_imp = np.kron(z_imp,eye2)
+
+    return z_imp
+
+
+
 coeffs = coeffs_calc(sv_np,eigvecs)
 sv_test = 0
 
@@ -369,14 +381,36 @@ for i in range(len(coeffs)):
 
 print("Printing the tested vals",np.linalg.norm(sv_test - sv_np))
 
+def coeff_matrix(eigvecs,coeffs):
+    coeff_mat = np.zeros((len(coeffs),len(coeffs)),dtype = complex)
+    for i in range(len(coeffs)):
+        for j in range(i,len(coeffs)):
+            coeff_mat[i,j] = np.conjugate(coeffs[i])*coeffs[j]*np.dot(np.conjugate(eigvecs[:,i]),np.dot(sz_operator(N),eigvecs[:,j]))
+            if i != j:
+                coeff_mat[j,i] = np.conjugate(coeff_mat[i,j])
+    return coeff_mat
+
+"""def plot_sz_mat(coeff_mat,eigvals,time_steps):
+    sz_vals = []
+    for i in range(time_steps):
+        sz_val = 0
+        for j in range(len(eigvals)):
+            for k in range(len(eigvals)):
+                sz_val += coeff_mat[k,j]*np.exp(-1j*(eigvals[j] - eigvals[k])*i)
+        sz_vals.append(sz_val)
+    return sz_vals"""
+
+
 #sz_vals = []
 
-#sz_exp = plot_Sz(N,eigvals,eigvecs,coeffs,100)
+coeffs_mat = coeff_matrix(eigvecs,coeffs)
 
-#data = np.loadtxt(f"N = 2, theta = {theta}, theta_k = {theta_k}, t = 100_sz_tol.txt")[:,1]
+#sz_exp = plot_sz_mat(coeffs_mat,eigvals,100)
+
+#data = np.loadtxt(f"scaled_codes/N = {N}, theta = {theta}, theta_k = {theta_k}, t = 100_sz_tol.txt")[:,1]
 
 """plt.plot(range(100),data,"ro-",label = "Theoretical")
-plt.plot(range(100),data,"b-",label = "Numerical")
+plt.plot(range(100),sz_exp,"b-",label = "Numerical")
 plt.xlabel('Time (trotter steps)')
 plt.ylabel(r"$\langle S_z \rangle$")
 plt.legend()
@@ -386,8 +420,8 @@ plt.show()"""
 
 ### Now we save the data
 
-data_eig = np.column_stack((eigvals,eigvecs))
+data_eig = np.column_stack((coeffs_mat))
 string = f"N = {N}, theta = {theta}, theta_k = {theta_k}"
 header_eig = string + "\n EIGVALS|| EIGVECS"
-np.savetxt(f"N={N},theta={theta},theta_k={theta_k},eigvecs_tol.txt",data_eig.view(float),header=header_eig)
+np.savetxt(f"N={N},theta={theta},theta_k={theta_k},coeffs_tol.txt",data_eig.view(float),header=header_eig)
 
