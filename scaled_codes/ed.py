@@ -16,7 +16,7 @@ from qiskit.quantum_info import partial_trace # To check later whether our deriv
 from qiskit.quantum_info import DensityMatrix
 from qiskit.quantum_info import purity
 from scipy import linalg as la
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 from qiskit_aer.primitives import Sampler
