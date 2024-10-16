@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-for Nloop in 6
+for Nloop in 2
 do
-    for theta_loop in 1.07 0.79
+    for theta_loop in 1.07 
     do
-        for thetak_loop in 0.79 0.52
+        for thetak_loop in 0.79 
         do
             
 
