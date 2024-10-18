@@ -381,35 +381,77 @@ for i in range(len(coeffs)):
 
 print("Printing the tested vals",np.linalg.norm(sv_test - sv_np))
 
-def coeff_matrix(eigvecs,coeffs):
-    coeff_mat = np.zeros((len(coeffs),len(coeffs)),dtype = complex)
-    for i in range(len(coeffs)):
-        for j in range(i,len(coeffs)):
-            coeff_mat[i,j] = np.conjugate(coeffs[i])*coeffs[j]*np.dot(np.conjugate(eigvecs[:,i]),np.dot(sz_operator(N),eigvecs[:,j]))
+##We sort the coeffs and the corresponding eignevalues and eigenvectors
+coeffs_abs = np.abs(coeffs)
+coeffs_sorted = np.argsort(coeffs_abs)[::-1]
+
+data_sorted = np.zeros((2**(2*N + 1),2**(2*N + 1) + 1),dtype = complex)
+
+for i in range(len(coeffs)):
+    data_sorted[:,i+1] = eigvecs[:,coeffs_sorted[i]]
+
+#Sort the eigenvalues as well
+for i in range(len(coeffs)):
+    data_sorted[i,0] = eigvals[coeffs_sorted[i]]
+
+
+coeffs2 = np.array(coeffs)
+
+coeffs_sort = coeffs2[coeffs_sorted]
+
+##Now, let us check if the sorting worked
+
+sv_test = 0
+
+for i in range(len(coeffs2)):
+    sv_test += coeffs_sort[i]*data_sorted[:,i+1]
+
+print("Sorted results",np.linalg.norm(sv_test - sv_np))
+print("Sorted data shape",data_sorted.shape)
+
+##Find the index in coeffs sort where coeff < tolerance
+tol = 1e-3
+index = len(coeffs_sort)-1
+#print(coeffs_sort)
+#print("Last element of coeffs sort",coeffs_sort[-2])
+for i in range(len(coeffs_sort)):
+    if np.abs(coeffs_sort[i]) < tol:
+        index = i
+        print("Index found",index)
+        break
+
+
+def coeff_matrix(data_sorted,coeffs_sort):
+    coeff_mat = np.zeros((index,index),dtype = complex)
+    for i in range(index):
+        for j in range(i,index):  
+            coeff_mat[i,j] = np.conjugate(coeffs_sort[i])*coeffs_sort[j]*np.dot(np.conjugate(data_sorted[:,i+1]),np.dot(sz_operator(N),data_sorted[:,j+1]))
             if i != j:
                 coeff_mat[j,i] = np.conjugate(coeff_mat[i,j])
     return coeff_mat
 
-"""def plot_sz_mat(coeff_mat,eigvals,time_steps):
+def plot_sz_mat(coeff_mat,data_sorted,time_steps):
     sz_vals = []
     for i in range(time_steps):
         sz_val = 0
-        for j in range(len(eigvals)):
-            for k in range(len(eigvals)):
-                sz_val += coeff_mat[k,j]*np.exp(-1j*(eigvals[j] - eigvals[k])*i)
+        for j in range(index):
+            for k in range(index):
+                sz_val += coeff_mat[k,j]*np.exp(-1j*(data_sorted[j,0] - data_sorted[k,0])*i)
         sz_vals.append(sz_val)
-    return sz_vals"""
+    return sz_vals
 
 
 #sz_vals = []
 
-coeffs_mat = coeff_matrix(eigvecs,coeffs)
+coeffs_mat = coeff_matrix(data_sorted,coeffs_sort)
 
-#sz_exp = plot_sz_mat(coeffs_mat,eigvals,100)
+print("Coeffs matrix shape",coeffs_mat.shape)
 
-#data = np.loadtxt(f"scaled_codes/N = {N}, theta = {theta}, theta_k = {theta_k}, t = 100_sz_tol.txt")[:,1]
+"""sz_exp = plot_sz_mat(coeffs_mat,data_sorted,100)
 
-"""plt.plot(range(100),data,"ro-",label = "Theoretical")
+data = np.loadtxt(f"scaled_codes/N = {N}, theta = {theta}, theta_k = {theta_k}, t = 100_sz_tol.txt")[:,1]
+
+plt.plot(range(100),data,"ro-",label = "Theoretical")
 plt.plot(range(100),sz_exp,"b-",label = "Numerical")
 plt.xlabel('Time (trotter steps)')
 plt.ylabel(r"$\langle S_z \rangle$")
