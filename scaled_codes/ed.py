@@ -461,9 +461,13 @@ plt.show()"""
 
 
 ### Now we save the data
+data = np.column_stack((eigvals,eigvecs))
 
 data_eig = np.column_stack((coeffs_mat))
 string = f"N = {N}, theta = {theta}, theta_k = {theta_k}"
 header_eig = string + "\n EIGVALS|| EIGVECS"
 np.savetxt(f"N={N},theta={theta},theta_k={theta_k},coeffs_tol.txt",data_eig.view(float),header=header_eig)
+
+data2 = np.column_stack((eigvals,eigvecs))
+np.savetxt(f"N={N},theta={theta},theta_k={theta_k},eigvecs_tol.txt",data2.view(float),header=header_eig)
 

@@ -2,9 +2,9 @@
 
 for Nloop in 6
 do
-    for theta_loop in 1.07 0.79
+    for theta_loop in 1.07 
     do
-        for thetak_loop in 0.79 0.52
+        for thetak_loop in 0 0.12 0.22 0.32 0.42 0.62
         do
             
 
