@@ -39,7 +39,7 @@ theta = float(sys.argv[2]) #hoping parameter for free fermions
 theta_k = float(sys.argv[3]) #Kondo interaction
 #t = int(sys.argv[4]) #number of time steps
 
-theta_z = 0.5*np.sqrt(2)*(np.sqrt(2) - 1)*np.pi*np.sin(theta)
+theta_z = -theta_k#0.5*np.sqrt(2)*(np.sqrt(2) - 1)*np.pi*np.sin(theta)
 #time_corr = int(sys.argv[5]) #time for correlator functions
 
 num_qubits = 2*N + 1  #In split side configuration
@@ -466,8 +466,8 @@ data = np.column_stack((eigvals,eigvecs))
 data_eig = np.column_stack((coeffs_mat))
 string = f"N = {N}, theta = {theta}, theta_k = {theta_k}"
 header_eig = string + "\n EIGVALS|| EIGVECS"
-np.savetxt(f"N={N},theta={theta},theta_k={theta_k},coeffs_tol.txt",data_eig.view(float),header=header_eig)
+np.savetxt(f"N={N},theta={theta},theta_k={theta_k},coeffs.txt",data_eig.view(float),header=header_eig)
 
 data2 = np.column_stack((eigvals,eigvecs))
-np.savetxt(f"N={N},theta={theta},theta_k={theta_k},eigvecs_tol.txt",data2.view(float),header=header_eig)
+np.savetxt(f"N={N},theta={theta},theta_k={theta_k},eigvecs.txt",data2.view(float),header=header_eig)
 
