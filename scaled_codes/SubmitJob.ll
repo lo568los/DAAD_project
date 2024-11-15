@@ -6,7 +6,7 @@
 #@ error  = Errors/$(jobid).error_file      
 #@ tasks_per_node = 8
 #@ environment = COPY_ALL                   
-#@ class = 32core
+#@ class = 128core_new
 #@ notification = complete
 #@ notify_user = ssoumyadeep@iisc.ac.in
 #@ queue 
