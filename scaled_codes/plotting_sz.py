@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 N = 6
 theta= 1.07  #pass the true values here
 theta_k = 0.79
-max_trotter_steps = 1000
+max_trotter_steps = 100
 
 def plot_corr_space(pos,corr_super):   # For corr vs time
     vals = corr_super[pos-1]
@@ -41,11 +41,14 @@ sz_vals5 = [0]*max_trotter_steps
 for i in range(max_trotter_steps):
     #data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
     #sz_vals[i] = data[1]
-    data = np.loadtxt(f"scaled_codes/data2/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_tol.txt")
+    data = np.loadtxt(f"../scaled_codes/data/N = 10, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
     sz_vals4[i] = data[1]
-    data = np.loadtxt(f"scaled_codes/data4/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_tol.txt")
+    data = np.loadtxt(f"../scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
     
     sz_vals3[i] = data[1]
+    data = np.loadtxt(f"../scaled_codes/data/N = 8, theta = {theta}, theta_k = {theta_k}, t = {i}_sz_TS.txt")
+    
+    sz_vals5[i] = data[1]
 
 
 
@@ -66,20 +69,23 @@ for i in range(max_trotter_steps):
               
 
 
-plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6, FS Anisotropic 1")
-plt.plot(range(max_trotter_steps),sz_vals3, "r--", label = "N=6, FS Isotropic 1")
+plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=10, TS Isotropic")
+plt.plot(range(max_trotter_steps),sz_vals5,"--",color='#ee9190', label = "N=8,TS")
+plt.plot(range(max_trotter_steps),sz_vals3, "r-", label = "N=6, TS Isotropic")
 #plt.plot(range(max_trotter_steps),sz_vals2, "r-", label = "N=6, FS Anisotropic")
 #plt.plot(range(max_trotter_steps),sz_vals5, "g-", label = "N=6, FS Isotropic")
 """plt.plot(range(max_trotter_steps),sz_vals4, "b-", label = "N=6,FS")
 plt.plot(range(max_trotter_steps),sz_vals3,"--",color='orange', label = "N=8,TS")
 plt.plot(range(max_trotter_steps),sz_vals,"g--", label = "N=10,TS")
 plt.plot(range(max_trotter_steps),sz_vals5,"g-", label = "N=10,FS")"""
-plt.xlabel("Time(trotter steps)")
-plt.ylabel(r"$\langle S^z_{imp} \rangle (t)$")
-plt.grid()
-plt.legend()
-plt.title(f"Impurity Magnetization v/s time for " +  r'$\theta = \pi/3$ and ' + r'$\theta_k = \pi/4$')
-plt.savefig(f"scaled_codes/plots4/Sz plot_FS_comp1", dpi =500)
+#plt.xlabel("Time(trotter steps)")
+#plt.ylabel(r"$\langle S^z_{imp} \rangle (t)$")
+#plt.grid()
+#plt.legend()
+#plt.rcParams.update({'font.size': 30})
+#plt.title(f"Impurity Magnetization v/s time for " +  r'$\theta = \pi/3$ and ' + r'$\theta_k = \pi/4$')
+plt.savefig(f"Sz_plot_FS_panel6,theta=pi3,theta_k=pi4_ts", dpi =3000)
+
 plt.close()
 
                 
