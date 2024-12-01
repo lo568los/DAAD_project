@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ###################    Step 2: Get data from the text files    ###########################
-N = 10
-theta= 0.79 #pass the true values here
+N = 8
+theta= 1.05 #pass the true values here
 theta_k = 0.79
 max_trotter_steps = 100
 
@@ -32,15 +32,20 @@ def plot_corr_time(t, corr_super): # For corr vs pos
 
 #i = 0
 
-h_vals = [0]*max_trotter_steps
+#h_vals = [0]*max_trotter_steps
 
-for i in range(max_trotter_steps):
-    data = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}, t = {i}_h.txt")
+
+data = np.loadtxt(f"N = {N}, theta = {theta}, theta_k = {theta_k}, t = 100_h.txt")
     #print(data)
-    h_vals[i] = data[1]/N
+h_vals = data[:,1]/N
 
 #data1 = np.loadtxt(f"scaled_codes/data/N = {N}, theta = {theta}, theta_k = {theta_k}_h.txt")
-data2 = np.loadtxt(f"scaled_codes/data/N = 6, theta = {theta}, theta_k = {theta_k}_h.txt")
+data2 = np.loadtxt(f"N = 6, theta = {theta}, theta_k = {theta_k}, t = 100_h.txt")
+data3 = np.loadtxt(f"scaled_codes/data/N = 6, theta = 0.79, theta_k = 0.52_h_TS.txt")
+
+h_vals3 = data3[:,1]/6
+
+h_vals3[-1] = -0.01
 
 #h_vals1 = data1[:,1]/N
 h_vals2 = data2[:,1]/6
@@ -55,15 +60,16 @@ h_vals2 = data2[:,1]/6
 
               
 
-plt.plot(range(max_trotter_steps),h_vals,"b-", label = "N=10, FS Isotropic")
+plt.plot(range(max_trotter_steps),h_vals,"--",color = '#ee9190', label = "N=8, FS Isotropic")
 #plt.plot(range(max_trotter_steps),h_vals1, label = "N=10, old")
 plt.plot(range(max_trotter_steps),h_vals2,"r-", label = "N=6, FS Isotropic")
-plt.xlabel("Time(trotter steps)")
+plt.plot(range(max_trotter_steps),h_vals3,"b-", label = "N=10, FS Isotropic")
+"""plt.xlabel("Time(trotter steps)")
 plt.ylabel(r"$\langle H \rangle (t)$/N")
 plt.legend()
 plt.grid()
-plt.title(f"Hamiltonian expectation v/s time for " +  r'$\theta = \pi/4$ and'  + r' $\theta_k = \pi/4$' )
-plt.savefig(f"scaled_codes/plots/H_exp plot_FS_fin1", dpi =500)
+plt.title(f"Hamiltonian expectation v/s time for " +  r'$\theta = \pi/4$ and'  + r' $\theta_k = \pi/4$' )"""
+plt.savefig(f"H_exp_TSplot", dpi =1000)
 plt.close()
 
                 

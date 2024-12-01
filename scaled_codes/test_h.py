@@ -44,6 +44,10 @@ N = int(sys.argv[1])  #Number of fermionic sites
 theta = float(sys.argv[2]) #hoping parameter for free fermions
 theta_k = float(sys.argv[3]) #Kondo interaction
 t = int(sys.argv[4]) #number of time steps
+if theta == 0:
+    theta = np.pi/3
+if theta_k == 1:
+    theta_k = np.pi/4
 #time_corr = int(sys.argv[5]) #time for correlator functions
 
 num_qubits = 2*N + 1  #In split side configuration
@@ -334,9 +338,9 @@ def ts_state_circuit(N, num_cl_bits = 0):  #Initialize state with fixed number o
 
 def circuit_3(N, trotter_steps,angles = 0,theta_k = 0,theta_z = 0, num_cl_bits = 0, trotter_barriers = False, save = False):
     if num_cl_bits == 0:
-        qc = fermi_state_circuit(N)
+        qc = ts_state_circuit(N)
     else:
-        qc = fermi_state_circuit(N,num_cl_bits)
+        qc = ts_state_circuit(N,num_cl_bits)
     qc.x(N)
     qc.barrier()
     
@@ -393,7 +397,8 @@ measured_bits =list(range(2*N + 1))  #list of qubits to measure
 
 estimator = Estimator(approximation=True) #estimator object to estimate the expectation values
 sampler = Sampler()  #sampler object to sample the circuits
-h_list1 = [0]
+h_list1 = [0]*t
+qc_list = []
 
 
 if theta_k > theta:
@@ -402,8 +407,10 @@ else:
     print('Creating super list of circuits....')
 
     t0 = time.time()
-    theta_z = 0.5*np.sqrt(2)*(np.sqrt(2) - 1)*np.pi*np.sin(theta)
-    qc = circuit_3(N,t,theta,theta_k,theta_z)
+    theta_z = -theta_k
+    for i in range(t):
+        qc = circuit_3(N,i,theta,theta_k,theta_z)
+        plot_hexp(qc,i,h_list1)
 
     t1 = time.time()
 
@@ -415,7 +422,7 @@ else:
     
     print("Starting to calculate expectation values in a parallel fashion....")
     t4 = time.time()
-    plot_hexp(qc,0,h_list1)
+    
 
     #h_list1.sort(key = lambda x: x[1])
     #h_list1 = [i[0] for i in h_list1]
@@ -430,7 +437,7 @@ else:
 
     #t6 = time.time()
 
-    time_list = [t]
+    time_list = list(range(t))
     
 
     string = f"N = {N}, theta = {theta}, theta_k = {theta_k}, t = {t}"
@@ -441,7 +448,7 @@ else:
     #data_sz = np.column_stack((time_list,sz_list1))
     #np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_sz.txt",data_sz,header = header_sz)
     data_h = np.column_stack((time_list,h_list1))
-    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_h_tol.txt",data_h,header = header_h)
+    np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}, t = {t}_h.txt",data_h,header = header_h)
     """data_ent = np.column_stack((time_list,conc_list1,vn_list1))
     np.savetxt(f"N = {N}, theta = {round(theta,2)}, theta_k = {round(theta_k,2)}_ent.txt",data_ent,header = header_ent)"""
 
