@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for Nloop in 6
+for Nloop in 10
 do
     for theta_loop in 1.07 0.79
     do
