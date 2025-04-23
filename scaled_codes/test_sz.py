@@ -408,7 +408,7 @@ if theta_k > theta:
 else:
     print('Creating super list of circuits....')
     t0 = time.time()
-    theta_z = 0.5*np.sqrt(2)*(np.sqrt(2) - 1)*np.pi*np.sin(theta)  #should it be negative? Test it out with positive values too
+    theta_z = 0.5*np.sqrt(2)*(np.sqrt(2) - 1)*np.sin(theta)  #should it be negative? Test it out with positive values too
     
     for i in range(t):
         qc = circuit_3(N,i,theta,theta_k,theta_z)
