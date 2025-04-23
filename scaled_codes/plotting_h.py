@@ -53,10 +53,6 @@ for i in range(max_trotter_steps):
 #h_vals2 = data2[:,1]/6
 
 
-        
-
-
-
 
 ###################    Step 3: Plot the data   ###########################
 
